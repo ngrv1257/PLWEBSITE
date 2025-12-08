@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Font Converter – Unicode ⇄ Amar</title>
+
+<!-- DOCX handling from browser -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<!-- ========= GLOBAL THEME (Apple-style, royal blue) ========= -->
+<style>
+  :root {
+    --bg-main: #f5f5f7;
+    --card-bg: #ffffff;
+    --border-soft: #e0e0e5;
+    --accent: #0050d6;          /* Royal blue */
+    --accent-soft: #e3edff;
+    --accent-dark: #0037a3;
+    --text-main: #111111;
+    --text-muted: #6b6b76;
+    --radius-card: 18px;
+    --radius-field: 12px;
+    --shadow-soft: 0 18px 35px rgba(0,0,0,0.08);
+    --shadow-very-soft: 0 10px 24px rgba(15,23,42,0.08);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    background: radial-gradient(circle at top left, #eef2ff 0, #f5f5f7 42%, #fdfdfd 100%);
+    color: var(--text-main);
+  }
+
+  /* Shell to center everything like a SaaS app */
+  .app-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 12px 60px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 980px;
+    background: var(--card-bg);
+    border-radius: 26px;
+    padding: 24px 24px 28px;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Top header row */
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .app-title {
+    font-size: 22px;
+    font-weight: 650;
+    letter-spacing: 0.03em;
+    color: #0b0b12;
+  }
+
+  .app-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* Converter “cards” inside container */
+  .card {
+    border-radius: var(--radius-card);
+    background: #fafafa;
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-very-soft);
+    padding: 18px 18px 18px;
+    margin-bottom: 18px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .card-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 6px 0 4px;
+    color: #111827;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 150px;
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 11px 12px;
+    border-radius: var(--radius-field);
+    border: 1px solid #d4d4dd;
+    resize: vertical;
+    outline: none;
+    background: #ffffff;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+  }
+
+  textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(0,80,214,0.55);
+    background: #ffffff;
+  }
+
+  .btn-row {
+    margin: 10px 0 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  button {
+    flex: 1;
+    min-width: 140px;
+    padding: 9px 16px;
+    border-radius: 999px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    box-shadow: 0 8px 14px rgba(0,80,214,0.22);
+    transition: background 0.16s ease, transform 0.08s ease, box-shadow 0.16s ease, opacity 0.1s ease;
+  }
+
+  button:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(0,80,214,0.26);
+  }
+
+  button:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 10px rgba(0,80,214,0.18);
+  }
+
+  button.secondary {
+    background: #f3f4ff;
+    color: #1e293b;
+    box-shadow: none;
+    border: 1px solid #d8def6;
+  }
+  button.secondary:hover {
+    background: #e4e7ff;
+  }
+
+  /* “Add Mapping” special styling */
+  .btn-add-mapping {
+    background: #002c80;
+    color: #ffd700;
+    border-radius: 999px;
+    box-shadow: 0 10px 18px rgba(0,44,128,0.35);
+    padding-inline: 20px;
+    flex: 0 0 auto;
+  }
+  .btn-add-mapping:hover {
+    background: #001f5a;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #e2e2ee;
+    margin: 18px 0;
+  }
+
+  .docx-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  @media (max-width: 720px) {
+    .app-shell {
+      padding: 18px 10px 42px;
+      align-items: stretch;
+    }
+    .container {
+      padding: 16px 14px 20px;
+      border-radius: 18px;
+    }
+    .app-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .btn-row {
+      flex-direction: column;
+    }
+    button {
+      flex: none;
+      width: 100%;
+    }
+  }
+
+  /* ===== PASSWORD OVERLAY ===== */
+  #lockScreen {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at top, rgba(255,255,255,0.15), rgba(0,0,0,0.6));
+    backdrop-filter: blur(16px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  #lockBox {
+    background: rgba(255,255,255,0.96);
+    color: #111827;
+    width: 420px;
+    max-width: 90%;
+    padding: 26px 24px 24px;
+    border-radius: 24px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(15,23,42,0.28);
+    border: 1px solid rgba(255,255,255,0.9);
+    animation: fadeIn 0.35s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-18px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  #lockBox h2 {
+    margin-top: 0;
+    font-size: 22px;
+    font-weight: 650;
+  }
+
+  #attemptInfo {
+    margin: 8px 0 16px;
+    font-size: 13px;
+    color: #6b7280;
+  }
+
+  #keyInputBox {
+    position: relative;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  #securityKey {
+    width: 100%;
+    padding: 11px 42px 11px 14px;
+    border-radius: 999px;
+    border: 1px solid #d4d4dd;
+    outline: none;
+    font-size: 16px;
+    background: #f9fafb;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+  }
+
+  #securityKey:focus {
+    border-color: #0050d6;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgba(0,80,214,0.45);
+  }
+
+  #toggleEye {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  #unlockBtn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 11px;
+    background: #0050d6;
+    border: none;
+    color: white;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    box-shadow: 0 12px 24px rgba(0,80,214,0.35);
+    transition: background 0.16s ease, transform 0.08s ease, box-shadow 0.16s ease;
+  }
+
+  #unlockBtn:hover {
+    background: #003b9f;
+    transform: translateY(-1px);
+    box-shadow: 0 16px 30px rgba(0,80,214,0.40);
+  }
+
+  #unlockBtn:active {
+    transform: translateY(0);
+    box-shadow: 0 8px 16px rgba(0,80,214,0.28);
+  }
+
+  /* ===== ADD-MAPPING MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.55);
+    backdrop-filter: blur(12px);
+    display: none; /* default hidden */
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+  }
+
+  .modal-box {
+    width: 420px;
+    max-width: 90%;
+    background: #ffffff;
+    padding: 24px 22px 18px;
+    border-radius: 22px;
+    color: #0f172a;
+    box-shadow: 0 18px 36px rgba(15,23,42,0.35);
+    border: 1px solid rgba(255,255,255,0.9);
+    animation: fadeInScale 0.25s ease-out;
+  }
+
+  @keyframes fadeInScale {
+    from { opacity: 0; transform: translateY(10px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-box h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 14px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .modal-box label {
+    font-size: 13px;
+    margin-top: 6px;
+    display: block;
+    color: #111827;
+  }
+
+  .modal-box input {
+    width: 100%;
+    padding: 9px 11px;
+    border-radius: 11px;
+    border: 1px solid #d4d4dd;
+    margin-top: 4px;
+    margin-bottom: 6px;
+    font-size: 15px;
+    outline: none;
+    background: #f9fafb;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+  }
+
+  .modal-box input:focus {
+    border-color: #0050d6;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgba(0,80,214,0.45);
+  }
+
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .modal-buttons button {
+    flex: 0 0 auto;
+    min-width: 90px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+  }
+
+  .modal-buttons button:first-child {
+    background: #f3f4f6;
+    color: #111827;
+  }
+
+  .modal-buttons button:first-child:hover {
+    background: #e5e7eb;
+  }
+
+  .modal-buttons .blue {
+    background: #0050d6;
+    color: #ffffff;
+    box-shadow: 0 10px 18px rgba(0,80,214,0.28);
+  }
+
+  .modal-buttons .blue:hover {
+    background: #003ea6;
+  }
+
+  /* Footer watermark */
+  #kgFooter {
+    position: fixed;
+    bottom: 10px;
+    right: 12px;
+    font-size: 11px;
+    font-family: system-ui, -apple-system, "SF Pro Text", sans-serif;
+    color: #6b7280;
+    background: rgba(255,255,255,0.85);
+    padding: 5px 9px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    pointer-events: none;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- ================= PASSWORD SECURITY OVERLAY ================= -->
+<div id="lockScreen">
+  <div id="lockBox">
+    <h2>🔐 Enter Security Key</h2>
+    <div id="attemptInfo">You have <b>3</b> attempts remaining</div>
+
+    <div id="keyInputBox">
+      <input type="password" id="securityKey" placeholder="Enter key…" />
+      <span id="toggleEye">👁️</span>
+    </div>
+
+    <button id="unlockBtn">Unlock</button>
+  </div>
+</div>
+
+<!-- ================= MAIN APP SHELL ================= -->
+<div class="app-shell">
+  <div class="container">
+
+    <div class="app-header">
+      <div>
+        <div class="app-title">Font Converter – Unicode ⇄ Amar</div>
+        <div class="app-subtitle">Internal KG & NB tool • Amar Hindi mapping engine</div>
+      </div>
+
+      <button class="btn-add-mapping" onclick="openAddMapping()">
+        ➕ Add Missing Mapping
+      </button>
+    </div>
+
+    <!-- CARD 1 – TEXT CONVERTER -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Text Conversion</div>
+        <div class="card-subtitle">Paste Unicode, convert to Amar codes and copy for Word (AmrHindi font).</div>
+      </div>
+
+      <label><b>Unicode Input</b></label>
+      <textarea id="unicodeInput" placeholder="Type or paste Unicode text here…"></textarea>
+
+      <div class="btn-row">
+        <button onclick="handleUnicodeToAmar()">Unicode → Amar</button>
+        <button class="secondary" onclick="copyAmar()">Copy Amar Output</button>
+      </div>
+
+      <label><b>Amar Output</b></label>
+      <textarea id="amarOutput" placeholder="Amar Hindi output will appear here…"></textarea>
+    </div>
+
+    <!-- CARD 2 – DOCX CONVERTER -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">DOCX Converter</div>
+        <div class="card-subtitle">Upload Unicode .docx → download Amar .docx with AmrHindi applied on runs.</div>
+      </div>
+
+      <input type="file" id="docxFile" accept=".docx" />
+      <div class="btn-row" style="margin-top:10px;">
+        <button onclick="convertDocx()">Convert & Download DOCX</button>
+      </div>
+
+      <div class="docx-hint">
+        Tip: Open the converted file in Word – the text will already be in Amar codes with <b>AmrHindi</b> font.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= ADD-MAPPING MODAL ================= -->
+<div id="addMappingModal" class="modal-overlay">
+  <div class="modal-box">
+    <h2>➕ Add Missing Mapping</h2>
+
+    <label>Unicode (Left side)</label>
+    <input id="modalUnicode" type="text" placeholder="Enter Unicode…" />
+
+    <label>Amar Output (Right side)</label>
+    <input id="modalAmar" type="text" placeholder="Enter Amar…" />
+
+    <label>Security Key</label>
+    <input id="modalKey" type="password" placeholder="Enter security key…" />
+
+    <div class="modal-buttons">
+      <button onclick="closeAddMapping()">Cancel</button>
+      <button class="blue" onclick="saveNewMapping()">Save Mapping</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER WATERMARK -->
+<div id="kgFooter">
+  Copyright@2025 by KG & NB! This module cannot be used commercially and without permission.
+</div>
+
+<!-- =================== ALL JAVASCRIPT LOGIC =================== -->
+<script>
+/* ============================================================
+   PASSWORD LOCK LOGIC
+============================================================ */
+const CORRECT_KEY = "251479";
+let attempts = 3;
+
+const lockScreen = document.getElementById("lockScreen");
+const keyInput   = document.getElementById("securityKey");
+const attemptInfo = document.getElementById("attemptInfo");
+
+document.getElementById("toggleEye").onclick = () => {
+  keyInput.type = keyInput.type === "text" ? "password" : "text";
+};
+
+keyInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") unlock();
+});
+
+document.getElementById("unlockBtn").onclick = unlock;
+
+function unlock() {
+  const val = keyInput.value.trim();
+
+  if (val === CORRECT_KEY) {
+    lockScreen.style.display = "none";
+    return;
+  }
+
+  attempts--;
+  attemptInfo.innerHTML = `You have <b>${attempts}</b> attempts remaining`;
+  keyInput.value = "";
+
+  if (attempts <= 0) {
+    alert("Access denied. Browser will now close this tab.");
+    window.close();
+    location.href = "about:blank"; // fallback
+  }
+}
+
+/* Close add-mapping modal on ESC */
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeAddMapping();
+});
+
+/* ============================================================
+   ADD-MAPPING MODAL OPEN/CLOSE
+============================================================ */
+function openAddMapping() {
+  document.getElementById("modalUnicode").value = "";
+  document.getElementById("modalAmar").value = "";
+  document.getElementById("modalKey").value = "";
+  document.getElementById("addMappingModal").style.display = "flex";
+}
+
+function closeAddMapping() {
+  document.getElementById("addMappingModal").style.display = "none";
+}
+
+/* ============================================================
+   PART 1 – BASE SIMPLE LETTER MAPPING (MAP_LETTERS)
+============================================================ */
+const MAP_LETTERS = {
+  "क":"k","ख":"K","ग":"g","घ":"G","ङ":"|",
+  "च":"c","छ":"C","ज":"j","झ":"J","ञ":"\\",
+  "ट":"t","ठ":"T","ड":"f","ढ":"F","ण":"x",
+  "त":"q","थ":"Q","द":"d","ध":"D","न":"n",
+  "प":"p","फ":"P","ब":"b","भ":"B","म":"m",
+  "य":"X","र":"r","ल":"l","व":"v",
+  "श":"S","ष":"†","स":"s","ह":"h",
+
+  "आ":"Aw","अ":"A","इ":"e","ई":"e~",
+  "उ":"a","ऊ":"‚","ए":"E","ऐ":"Ey","ओ":"Ao","औ":"AO",
+
+  "ं":"<","ँ":">","ा":"w","ि":"i","ी":"I","ु":"u","ू":"U",
+  "े":"y","ै":"Y","ो":"o","ौ":"O","ृ":"÷",
+
+  "।":"[","॥":"[[","-":"-","=":"=",
+  "०":"0","१":"1","२":"2","३":"3","४":"4",
+  "५":"5","६":"6","७":"7","८":"8","९":"9",
+  "़":"¡","ऱ":"X¡"
+};
+
+/* ============================================================
+   PART 2 – HALF-CONSONANTS SET A (MAP_HALFA)
+   Used when ANY consonant follows after halant
+============================================================ */
+const MAP_HALFA = {
+  "क्":"#","ख्":"$","ग्":"^","घ्":"%","ङ्":"ç","च्":"Ç","छ्":"C",
+  "ज्":"È","झ्":"É","ञ्":"Ê","ट्":"è","ठ्":"T`","ड्":"é","ढ्":"F",
+  "ण्":"&","त्":"Ë","थ्":"Ì","ध्":"Í","न्":"N","प्":"Î","श्‍":"Ü","स्":"á","ष्":"à",
+  "फ्":"Ï","ब्":"Ñ","म्":"M","भ्":"Ò","ल्":"Ø","व्":"Û","व्":"Û","व्":"Û","व्":"Û",
+  "र्":"r`"
+};
+
+/* ============================================================
+   PART 3 – HALF-CONSONANTS SET B (MAP_HALFB)
+   Used when NO consonant follows after halant
+============================================================ */
+const MAP_HALFB = {
+  "क्":"k`","ख्":"K`","ग्":"g`","घ्":"G`","ङ्":"|`",
+  "च्":"c`","छ्":"C`","ज्":"j`","झ्":"J`","ञ्":"\\`",
+  "ट्":"t`","ठ्":"T`","ड्":"f`","ढ्":"F`","ण्":"x`",
+  "त्":"q`","थ्":"Q`","द्":"d`","ध्":"D`","न्":"n`",
+  "प्":"p`","फ्":"P`","ब्":"b`","भ्":"B`","म्":"m`",
+  "य्":"X`","र्क्":"k~`","ल्":"l`","व्":"v`",
+  "श्":"S`","ष्":"†`","स्":"s`","ह्":"h`"
+};
+
+/* ============================================================
+   PART 4 – CONJUNCTS (MAP_CONJ)
+   Highest priority after words
+============================================================ */
+const MAP_CONJ = {
+  /* ==== Existing approved conjuncts ==== */
+  "क्क":"˜","द्ग":"êî","द्घ":"êò","द्द":"¨","द्ब":"êô","द्भ":"êB","ष्ट्र":"àtö",
+  "द्म":"®","द्व":"êù","द्र":"dR","कृ":"™","क्त्र":"ÂR","क्त्व":"Âù",
+  "क्त्स":"Â`s","क्क्ष":"˜`†","क्क्ल":"˜¬","क्र":"kõ","द्ध":"©",
+  "भ्र":"BR","ह्न":"Hn","ट्र":"tö","ह्म":"Hm","ह्व":"Hv","ह्य":"HX","ह्ल":"Hl",
+
+  "क्ष्ण":"âx","स्क्ल्यै":"á›ÔY","द्म्य":"®Ô","स्फ्यक्त":"áÏXÂ","द्ब्यौ":"êôÔO","र्ज्ञ्य":"åX~",
+  "ग्न्य":"^NX","द्घ्म्य":"êò`MX","ह्न्य":"HNX",
+  "श्म्य":"ÜMX","द्ब्ध्य":"êô`ÍX","ष्प्त्य":"àÎËX","ह्ल्य":"HØX","र्त्र्यै":"ãXY~",
+  "द्ग्ध्य":"êî`ÍX","द्घ्र्य":"êòRÔ","द्श्र्य":"ê‰Ô","द्स्क्य":"êá#X",
+  "ण्म्य":"&MX","र्ण्ड्र्य":"&föÔ~","ष्क्ल्य":"à›Ô","र्त्स्व्य":"ËáÛX~","र्ग्ल्य":"^ØX~",
+  "र्श्र्य":"‰Ô~","र्स्थ्य":"áÌX~","र्ह्न्य":"HNX~","क्ल्यै":"›ÔY","द्र्य":"dRÔ",
+  "द्म्न्य":"®óÔ","ष्ण्य":"à&X","द्व्य":"êùÔ","र्ण्व्य":"&ÛX~","त्र्य":"ãX",
+  "र्ग्ष्ण्य":"^à&X~","द्ध्य":"©Ô",
+
+  "प्र":"pR","त्र":"Z","ज्ञ":"z","ज्ञा":"zw","ज्ञे":"zy",
+  "श्र":"‰","श्रे":"‰y","श्रा":"‰w",
+
+  "द्य":"´","द्यु":"´u",
+
+  "स्त्र":"áZ","स्त्रा":"áZw","स्त्रै":"áZY",
+
+  "म्न":"Mn","ग्न":"^n","अग्नि":"Ai^n",
+
+  "क्त":"Â","क्त्वा":"Âùw",
+
+  "स्व":"áv","स्वा":"ávw","स्वः":"ávÚ",
+
+  "ह्म":"Hm","क्ष":"@","ग्र":"gR",
+
+  /* --- स्त-series --- */
+  "स्त":"áq",
+  "स्त्व":"áËv",
+  "स्न":"án",
+  "स्म":"ám",
+  "स्क":"ák",
+  "स्क्र":"ákõ",
+  "स्ल":"ál",
+  "स्प":"áp",
+  "स्फ":"áP",
+  "स्क्ल":"á›",
+  "स्श":"áS",
+  "स्स":"ás",
+  "स्स्म":"áám",
+  "स्स्व":"ááv",
+  "स्स्क":"áák",
+  "स्स्न":"áán",
+  "स्स्प":"ááp",
+  "स्स्थ":"ááQ",
+  "स्स्व्य":"ááÛX",
+
+  /* --- श-series --- */
+  "श्न":"Ün",
+  "श्म":"Üm",
+  "श्व":"Üv",
+  "श्त":"Üq",
+  "श्ल":"Ül",
+  "श्क":"Ük",
+  "श्च":"Üc",
+  "श्ञ":"Ü\\",
+  "श्फ":"ÜP",
+  "श्ब":"Üb",
+  "श्भ":"ÜB",
+  "श्व्य":"ÜÛX",
+  "श्य":"ÜX",
+
+  /* --- ष-series --- */
+  "ष्ट":"àt",
+  "ष्ठ":"Ä",
+  "ष्ण":"àx",
+  "ष्प":"àp",
+  "ष्च":"àc",
+  "ष्व":"àv",
+  "ष्म":"àm",
+  "ष्र":"†R",
+
+  "क्तॉ":"Âw","त्रॉ":"Zw","द्रॉ":"dRw","क्रॉ":"kõw","ग्रॉ":"gRw","प्रॉ":"pRw","ब्रॉ":"bRw","ध्रॉ":"DRw","श्रॉ":"‰w",
+  "कॉ":"kw","खॉ":"Kw","गॉ":"gw","घॉ":"Gw","ङॉ":"|w","चॉ":"cw","छॉ":"Cw","जॉ":"jw","झॉ":"Jw",
+  "ञॉ":"\\w","टॉ":"tw","ठॉ":"Tw","डॉ":"fw","ढॉ":"Fw","णॉ":"xw","तॉ":"qw","थॉ":"Qw","दॉ":"dw","धॉ":"Dw",
+  "नॉ":"nw","पॉ":"pw","फॉ":"Pw","बॉ":"bw","भॉ":"Bw","मॉ":"mw","यॉ":"Xw","रॉ":"rw","लॉ":"lw","वॉ":"vw",
+  "शॉ":"Sw","षॉ":"†w","सॉ":"sw","हॉ":"hw",
+
+  "यः":"XÚ","स्त्य":"áËX","ह्नः":"HnÚ","रः":"rÚ","ब्धः":"ÑDÚ","क्ष्म":"âm","र्थः":"Q~Ú",
+  "ष्ट्‌":"àt`","धः":"DÚ","थः":"QÚ","क्त्‌स्न":"Â`án","न्तः":"NqÚ","र्क्ष्य":"âX~","मः":"mÚ","क्त्य":"ÂÔ","क्तः":"ÂÚ","लः":"lÚ","ण्यः":"&XÚ","स्त्र्य":"áãX","स्म्य":"áMX","ह्र्":"hR`",
+
+  "द्धिः":"i©Ú","ष्प्र":"àpR","व्यः":"ÛXÚ","र्ण्क्त्र":"&ÂR~","पः":"pÚ",
+
+  /* --- final single --- */
+  "ण्य":"&X"
+};
+
+/* ZWJ-variant conjuncts for Word-style sequences (e.g. त्‍र, स्‍व) */
+const MAP_CONJ_ZWJ = {};
+for (const key in MAP_CONJ) {
+  if (key.includes("्")) {
+    const zwjKey = key.replace(/्/g, "्‍");  // halant + ZWJ
+    MAP_CONJ_ZWJ[zwjKey] = MAP_CONJ[key];
+  }
+}
+
+/* ============================================================
+   PART 5 – WORD EXCEPTIONS (MAP_WORDS)
+============================================================ */
+const MAP_WORDS = {
+  "त्रिकूट":"iZkUt","रु":"{","त्रिपृष्ठ":"iZp÷Ä","त्रिवेणी":"iZvyxI","क्ल्यौ":"›ÔO","रू":"}","वः":"vÚ","नः":"nÚ",
+  "त्रिशूल":"iZSUl","त्व्य":"ËÛX","ऋषी":"ˆ†I","षी":"†I","म्र":"mR","स्त्रैण्य":"áZY&X","क्य":"#X","ण्य":"&X","द्भ्र":"êBR",
+  "त्रासदी":"ZwsdI","ज्ञानेश्वर":"zwnyÜvr","ज्ञानकोश":"zwnkoS","र्ण":"x~","र्ण्य":"&X~","र्ण्व":"&v~","र्ण्म":"&m~","र्ण्न":"&n~","द्घ्न्य":"êòóÔ",
+  "र्ण्ड":"&f~","र्ण्ध":"&D~","र्ण्ग":"&g~","र्ण्क":"&k~","र्ण्ठ":"&T~","र्ण्ट":"&t~","र्ण्प":"&p~","र्ण्भ":"&B~","र्ण्स":"&s~","र्ण्य":"&X~",
+  "र्ण्ष":"&†~","र्ण्ज":"&j~","र्ण्त":"&q~","र्ण्म्य":"&MX~","🔥 ":"🔥 ","र्न्य":"NX~","र्म्य":"MX~","र्स्य":"áX~","र्त्य":"ËX~",
+  "र्थ्य":"ÌX~","र्ज्य":"ÈX~","र्क्य":"#X~","र्व्य":"ÛX~","र्घ्य":"%X~","र्ह्य":"HX~","ह्र":"hR","ण्यः":"&XÚ","क्तिः":"iÂÚ","ह्र्य":"hRÔ","स्त्र्य":"áãX","क्ष्म्य":"âMX","स्त्र्य":"áãX","श्र्य":"‰Ô",
+
+  "विज्ञप्ति":"ivziÎq","प्रज्ञा":"pRzw","संज्ञा":"s<zw",
+  "क्षरण":"@rx","क्षत्रिय":"@iZX","क्षमाशील":"@mwSIl",
+  "उत्कृष्ट":"aË™àt","कृष्ण":"™àx","अक्षर":"A@r",
+  "श्रवण":"‰vx","श्रेया":"‰yXw","श्रमिक":"‰imk",
+  "श्रेयस्कर":"‰yXákr","श्रद्धा":"‰©w",
+  "विद्युत":"iv´uq","न्यायालय":"NXwXwlX","उद्यान":"a´wn","द्युति":"´uiq",
+  "अध्यात्म":"AÍXwËm","ध्य":"ÍX","ध्यान":"ÍXwn",
+  "अध्ययन":"AÍXXn","अध्याय":"AÍXwX","द्घ्न":"êòó","द्ग्ध":"êî`D",
+
+  "मध्यप्रदेश":"mÍXpRdyS","साध्य":"swÍX","त्व":"Ëv",
+  "संस्कृतित्व":"s<á™iqËv","व्यक्तित्व":"ÛXiÂËv","स्त्रीत्व":"áZIËv",
+  "पवित्रत्व":"pivZËv","आत्मत्व":"AwËmËv",
+
+  "श्व":"Üv","श्वसन":"Üvsn","श्वास":"Üvws","श्वेत":"Üvyq","तः":"qÚ",
+  "श्वान":"Üvwn","श्वेच्छा":"ÜvyÇCw",
+
+  "अह्निका":"AiHnkw","प्रह्ण":"pRHx","दह्नि":"diHn","हिमालय":"ihmwlX",
+  "उन्मेष":"aNmy†","उन्माद":"aNmwd","ब्रह्म":"bRHm","ब्रह्मा":"bRHmw",
+
+  "स्त्र":"áZ","स्त्री":"áZI","स्त्रोत":"áZoq","स्त्रैण":"áZYx",
+  "स्त्रैणता":"áZYxqw","स्त्रोतस्वर":"áZoqávr",
+
+  "चमत्कारिक:":"cmËkwirk:","चिन्मय":"icNmX","मनन":"mnn",
+  "अम्नाय":"AMnwX","निम्न":"inMn","स्मरण":"ámrx",
+
+  "धात्वर्थ":"DwËvQ~","संयोजन":"s<Xojn",
+  "दुग्धग्न":"du^D^n","राग्न्य":"rw^NX","अग्निदेव":"Ai^ndyv","अग्निकुंड":"Ai^nku<f",
+
+  "उक्त":"aÂ","भुक्त":"BuÂ","युक्त":"XuÂ","दृष्ट":"d÷àt","भक्ति":"BiÂ",
+  "स्वस्तिप्रजाभ्यः":"áviáqpRjwÒXÚ",
+
+  "परिपालयन्तां":"pirpwlXNqw<","न्यायेन":"NXwXyn","मार्गेण":"mwgy~x",
+  "गोब्राह्मणेभ्यः":"gobRwHmxyÒXÚ","शुभमस्तु":"SuBmáqu","नित्यं":"inËX<",
+  "लोकाः":"lokwÚ","समस्ताः":"smáqwÚ","सुखिनो":"suiKno","भवन्तु":"BvNqu",
+
+  "डॉक्टर":"fॉ#tr","स्र":"sR","क्ल":"›"
+};
+
+/* ============================================================
+   USER_MAP MERGE – for new mappings saved from UI
+   (merged into MAP_CONJ before we build KEY arrays)
+============================================================ */
+let USER_MAP = {};
+try {
+  const stored = localStorage.getItem("userMappings");
+  if (stored) USER_MAP = JSON.parse(stored);
+} catch (e) {
+  USER_MAP = {};
+}
+for (const k in USER_MAP) {
+  MAP_CONJ[k] = USER_MAP[k];
+}
+
+/* ============================================================
+   PART 6 – DERIVED HELPER SETS & CONSTANTS
+============================================================ */
+const WORD_KEYS     = Object.keys(MAP_WORDS).sort((a,b)=>b.length - a.length);
+const CONJ_KEYS     = Object.keys(MAP_CONJ).sort((a,b)=>b.length - a.length);
+const CONJ_KEYS_ZWJ = Object.keys(MAP_CONJ_ZWJ).sort((a,b)=>b.length - a.length);
+
+const CONJ_VALUES = new Set(Object.values(MAP_CONJ));
+const HALF_VALUES = new Set([
+  ...Object.values(MAP_HALFA),
+  ...Object.values(MAP_HALFB)
+]);
+
+const MAX_CONJ_LEN = Math.max(...Array.from(CONJ_VALUES, v => v.length));
+const MAX_HALF_LEN = Math.max(...Array.from(HALF_VALUES, v => v.length));
+
+const SIMPLE_CONS_CHARS = new Set([
+  "k","K","g","G","|","c","C","j","J","\\",
+  "t","T","f","F","x","q","Q","d","D","n",
+  "p","P","b","B","m","X","r","l","v","S",
+  "†","s","h"
+]);
+
+function isDevaConsonant(ch) {
+  return /[क-हक़-ख़ग़ज़ड़ढ़फ़य़]/.test(ch);
+}
+
+// Look ahead from the halant to see if ANY consonant appears
+// (ignoring ZWJ/ZWNJ and matras/signs)
+function hasNextConsonantAfterHalant(text, halantIndex) {
+  for (let j = halantIndex + 1; j < text.length; j++) {
+    const ch = text[j];
+    if (ch === "\u200c" || ch === "\u200d") continue;
+    if (isDevaConsonant(ch)) return true;
+    if (!/[\u0900-\u097F]/.test(ch)) return false;
+  }
+  return false;
+}
+
+/* ============================================================
+   PART 7 – i-SWAP (rules a, b, c)
+============================================================ */
+function swapI(text) {
+  let arr = text.split("");
+
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] !== "i") continue;
+
+    let posC = i - 1;
+    if (posC < 0) continue;
+    if (/\s/.test(arr[posC])) continue;
+
+    let moved = false;
+
+    // Rule (c): If just after conjunct → move before conjunct
+    for (let L = MAX_CONJ_LEN; L >= 1; L--) {
+      const start = posC - L + 1;
+      if (start < 0) continue;
+
+      const cand = arr.slice(start, posC + 1).join("");
+      if (CONJ_VALUES.has(cand)) {
+        arr.splice(i, 1);
+        arr.splice(start, 0, "i");
+        i = start + 1;
+        moved = true;
+        break;
+      }
+    }
+    if (moved) continue;
+
+    if (!SIMPLE_CONS_CHARS.has(arr[posC])) continue;
+
+    // Rule (b): look for half block before consonant
+    let clusterStart = posC;
+    const halfEnd = posC - 1;
+
+    if (halfEnd >= 0) {
+      for (let L = MAX_HALF_LEN; L >= 1; L--) {
+        const start = halfEnd - L + 1;
+        if (start < 0) continue;
+
+        const cand = arr.slice(start, halfEnd + 1).join("");
+        if (HALF_VALUES.has(cand)) {
+          clusterStart = start;
+          break;
+        }
+      }
+    }
+
+    // Rule (a/b): move i before clusterStart
+    arr.splice(i, 1);
+    arr.splice(clusterStart, 0, "i");
+    i = clusterStart + 1;
+  }
+
+  return arr.join("");
+}
+
+/* ============================================================
+   PART 8 – REPH FIX (r` → ~) with matra-aware behavior
+============================================================ */
+function fixReph(text) {
+  let arr = text.split("");
+  let i = 0;
+
+  const MATRA_AFTER = new Set(["w","I","u","U","÷","y","Y","o","O","ॅ"]);
+
+  while (i < arr.length - 1) {
+    if (arr[i] === "r" && arr[i + 1] === "`") {
+
+      // CASE 1: chhoti i already swapped before consonant
+      if (arr[i + 2] === "i") {
+        const iIndex = i + 2;
+        const consonantIdx = iIndex + 1;
+
+        if (consonantIdx >= arr.length) {
+          arr.splice(i, 3, "i", "~");
+          continue;
+        }
+
+        let insertAt = consonantIdx + 1;
+        while (insertAt < arr.length && MATRA_AFTER.has(arr[insertAt])) {
+          insertAt++;
+        }
+
+        let target = insertAt;
+        arr.splice(i, 2);
+        target -= 2;
+        if (target < 0) target = 0;
+        arr.splice(target, 0, "~");
+        continue;
+      }
+
+      // CASE 2: normal case – consonant then matras
+      let consonantIdx = i + 2;
+      if (consonantIdx >= arr.length) {
+        arr.splice(i, 2, "~");
+        continue;
+      }
+
+      let insertAt = consonantIdx + 1;
+      while (insertAt < arr.length && MATRA_AFTER.has(arr[insertAt])) {
+        insertAt++;
+      }
+
+      let target = insertAt;
+      arr.splice(i, 2);
+      target -= 2;
+      if (target < 0) target = 0;
+      arr.splice(target, 0, "~");
+      continue;
+    }
+
+    i++;
+  }
+
+  return arr.join("");
+}
+
+/* ============================================================
+   PART 9 – FULL UNICODE → AMAR ENGINE WITH PRIORITY
+============================================================ */
+function fullUnicodeToAmar(text) {
+  let out = "";
+  let i = 0;
+
+  outerLoop:
+  while (i < text.length) {
+
+    // 1. WORD EXCEPTIONS
+    for (const w of WORD_KEYS) {
+      if (text.startsWith(w, i)) {
+        out += MAP_WORDS[w];
+        i += w.length;
+        continue outerLoop;
+      }
+    }
+
+    // 2. CONJUNCTS (normal)
+    for (const cj of CONJ_KEYS) {
+      if (text.startsWith(cj, i)) {
+        out += MAP_CONJ[cj];
+        i += cj.length;
+        continue outerLoop;
+      }
+    }
+
+    // 2b. CONJUNCTS with ZWJ (e.g. त्‍र, स्‍व)
+    for (const cj of CONJ_KEYS_ZWJ) {
+      if (text.startsWith(cj, i)) {
+        out += MAP_CONJ_ZWJ[cj];
+        i += cj.length;
+        continue outerLoop;
+      }
+    }
+
+    const ch = text[i];
+    const next = text[i+1];
+
+    // Skip ZWJ/ZWNJ in output
+    if (ch === "\u200c" || ch === "\u200d") {
+      i++;
+      continue;
+    }
+
+    // 3 & 4. HALF A / HALF B with "any consonant after halant" rule
+    if (next === "्") {
+      const halfKey = ch + "्";
+      const hasCons = hasNextConsonantAfterHalant(text, i + 1);
+
+      if (hasCons && MAP_HALFA[halfKey]) {
+        out += MAP_HALFA[halfKey];
+        i += 2;
+        continue;
+      }
+
+      if (!hasCons && MAP_HALFB[halfKey]) {
+        out += MAP_HALFB[halfKey];
+        i += 2;
+        continue;
+      }
+
+      if (MAP_HALFA[halfKey]) {
+        out += MAP_HALFA[halfKey];
+        i += 2;
+        continue;
+      }
+      if (MAP_HALFB[halfKey]) {
+        out += MAP_HALFB[halfKey];
+        i += 2;
+        continue;
+      }
+    }
+
+    // 5. SIMPLE LETTER
+    if (MAP_LETTERS[ch] !== undefined) {
+      out += MAP_LETTERS[ch];
+    } else {
+      out += ch;
+    }
+
+    i++;
+  }
+
+  out = swapI(out);
+  out = fixReph(out);
+  return out;
+}
+
+/* ============================================================
+   PART 10 – AMAR → UNICODE REVERSE (best-effort)
+============================================================ */
+let MASTER_MAP = {};
+for (const k in MAP_LETTERS) MASTER_MAP[k] = MAP_LETTERS[k];
+for (const k in MAP_HALFB)   MASTER_MAP[k] = MAP_HALFB[k];
+for (const k in MAP_HALFA)   MASTER_MAP[k] = MAP_HALFA[k];
+for (const k in MAP_CONJ)    MASTER_MAP[k] = MAP_CONJ[k];
+for (const k in MAP_WORDS)   MASTER_MAP[k] = MAP_WORDS[k];
+
+let REVERSE_MAP = {};
+for (const k in MASTER_MAP) {
+  const v = MASTER_MAP[k];
+  if (!REVERSE_MAP[v]) REVERSE_MAP[v] = k;
+}
+const REVERSE_KEYS = Object.keys(REVERSE_MAP).sort((a,b)=>b.length - a.length);
+
+function amarToUnicode(text) {
+  let out = "";
+  let i = 0;
+  while (i < text.length) {
+    let matched = false;
+    for (const key of REVERSE_KEYS) {
+      if (text.startsWith(key, i)) {
+        out += REVERSE_MAP[key];
+        i += key.length;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      out += text[i];
+      i++;
+    }
+  }
+  return out;
+}
+
+/* ============================================================
+   PART 11 – ADD NEW USER MAPPING (modal) – goes into MAP_CONJ
+============================================================ */
+function saveNewMapping() {
+  const uni  = document.getElementById("modalUnicode").value.trim();
+  const amar = document.getElementById("modalAmar").value.trim();
+  const key  = document.getElementById("modalKey").value.trim();
+
+  if (!uni || !amar) {
+    alert("❌ Unicode and Amar cannot be empty.");
+    return;
+  }
+
+  if (key !== CORRECT_KEY) {
+    alert("❌ Incorrect password");
+    return;
+  }
+
+  USER_MAP[uni] = amar;
+  try {
+    localStorage.setItem("userMappings", JSON.stringify(USER_MAP));
+  } catch(e) {}
+
+  MAP_CONJ[uni] = amar;
+  if (!CONJ_KEYS.includes(uni)) {
+    CONJ_KEYS.push(uni);
+    CONJ_KEYS.sort((a,b)=>b.length - a.length);
+  }
+
+  alert(`✅ Mapping Added:\n${uni} → ${amar}`);
+  closeAddMapping();
+}
+
+/* ============================================================
+   PART 12 – UI HANDLERS
+============================================================ */
+function handleUnicodeToAmar() {
+  const u = document.getElementById("unicodeInput").value;
+  const a = fullUnicodeToAmar(u);
+  document.getElementById("amarOutput").value = a;
+}
+
+function handleAmarToUnicode() {
+  const a = document.getElementById("amarOutput").value;
+  const u = amarToUnicode(a);
+  document.getElementById("unicodeInput").value = u;
+}
+
+function copyAmar() {
+  const box = document.getElementById("amarOutput");
+  box.select();
+  document.execCommand("copy");
+}
+
+/* ============================================================
+   PART 13 – DOCX: Unicode → Amar (keep structure)
+============================================================ */
+async function convertDocx() {
+  const fileInput = document.getElementById("docxFile");
+  if (!fileInput || !fileInput.files.length) {
+    alert("Please choose a DOCX file.");
+    return;
+  }
+
+  const file = fileInput.files[0];
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const zip = await JSZip.loadAsync(arrayBuffer);
+
+    const docFile = zip.file("word/document.xml");
+    if (!docFile) {
+      alert("This file does not look like a valid DOCX (word/document.xml missing).");
+      return;
+    }
+
+    const xmlString = await docFile.async("string");
+
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+
+    if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
+      console.error("XML parse error:", xmlDoc.getElementsByTagName("parsererror")[0]);
+      alert("Error reading DOCX XML structure.");
+      return;
+    }
+
+    const W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+    let textNodes = xmlDoc.getElementsByTagNameNS(W_NS, "t");
+    if (!textNodes || textNodes.length === 0) {
+      textNodes = xmlDoc.getElementsByTagName("w:t");
+    }
+
+    for (let i = 0; i < textNodes.length; i++) {
+      const node = textNodes[i];
+      const original = node.textContent || "";
+      const converted = fullUnicodeToAmar(original);
+      node.textContent = converted;
+
+      const runNode = node.parentNode; // <w:r>
+      if (runNode) {
+        let rPr = runNode.getElementsByTagNameNS(W_NS, "rPr")[0];
+        if (!rPr) {
+          rPr = xmlDoc.createElementNS(W_NS, "w:rPr");
+          runNode.insertBefore(rPr, node);
+        }
+
+        const rFonts = xmlDoc.createElementNS(W_NS, "w:rFonts");
+        rFonts.setAttribute("w:ascii", "AmrHindi");
+        rFonts.setAttribute("w:hAnsi", "AmrHindi");
+        rFonts.setAttribute("w:cs", "AmrHindi");
+        rPr.appendChild(rFonts);
+      }
+    }
+
+    const serializer = new XMLSerializer();
+    const newXmlString = serializer.serializeToString(xmlDoc);
+
+    zip.file("word/document.xml", newXmlString);
+
+    const outBlob = await zip.generateAsync({
+      type: "blob",
+      mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    });
+
+    const ts = new Date().toISOString().replace(/[^\d]/g, "").slice(0,14);
+    const outName = file.name.replace(/\.docx$/i, "") + "_amar_" + ts + ".docx";
+
+    saveAs(outBlob, outName);
+    alert("DOCX converted successfully.");
+
+  } catch (err) {
+    console.error("DOCX conversion error:", err);
+    alert("Error converting DOCX. The file may be protected or not a standard DOCX.");
+  }
+}
+</script>
+
+</body>
+</html>
+
+<script>
+setInterval(() => {
+  parent.postMessage({frameHeight: document.body.scrollHeight}, "*");
+}, 500);
+</script>
+
