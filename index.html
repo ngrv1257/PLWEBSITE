@@ -5,292 +5,132 @@
 <title>Font Converter – Unicode ⇄ Amar</title>
 
 <!-- DOCX handling from browser -->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-<!-- ========= GLOBAL THEME (Apple-style, royal blue) ========= -->
 <style>
-  :root {
-    --bg-main: #f5f5f7;
-    --card-bg: #ffffff;
-    --border-soft: #e0e0e5;
-    --accent: #0050d6;          /* Royal blue */
-    --accent-soft: #e3edff;
-    --accent-dark: #0037a3;
-    --text-main: #111111;
-    --text-muted: #6b6b76;
-    --radius-card: 18px;
-    --radius-field: 12px;
-    --shadow-soft: 0 18px 35px rgba(0,0,0,0.08);
-    --shadow-very-soft: 0 10px 24px rgba(15,23,42,0.08);
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
   body {
+    font-family: Arial, sans-serif;
+    background: #f3f3f3;
     margin: 0;
     padding: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-    background: radial-gradient(circle at top left, #eef2ff 0, #f5f5f7 42%, #fdfdfd 100%);
-    color: var(--text-main);
   }
-
-  /* Shell to center everything like a SaaS app */
-  .app-shell {
-    min-height: 100vh;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 32px 12px 60px;
-  }
-
   .container {
-    width: 100%;
-    max-width: 980px;
-    background: var(--card-bg);
-    border-radius: 26px;
-    padding: 24px 24px 28px;
-    box-shadow: var(--shadow-soft);
-    border: 1px solid rgba(255,255,255,0.9);
-    backdrop-filter: blur(10px);
+    max-width: 960px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   }
-
-  /* Top header row */
-  .app-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 18px;
-  }
-
-  .app-title {
-    font-size: 22px;
-    font-weight: 650;
-    letter-spacing: 0.03em;
-    color: #0b0b12;
-  }
-
-  .app-subtitle {
-    font-size: 13px;
-    color: var(--text-muted);
-  }
-
-  /* Converter “cards” inside container */
-  .card {
-    border-radius: var(--radius-card);
-    background: #fafafa;
-    border: 1px solid var(--border-soft);
-    box-shadow: var(--shadow-very-soft);
-    padding: 18px 18px 18px;
-    margin-bottom: 18px;
-  }
-
-  .card-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
+  h2 {
+    text-align: center;
     margin-bottom: 10px;
   }
-
-  .card-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #111827;
-  }
-
-  .card-subtitle {
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
-  label {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-    margin: 6px 0 4px;
-    color: #111827;
-  }
-
   textarea {
     width: 100%;
-    min-height: 150px;
-    font-size: 15px;
-    line-height: 1.5;
-    padding: 11px 12px;
-    border-radius: var(--radius-field);
-    border: 1px solid #d4d4dd;
+    min-height: 140px;
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
     resize: vertical;
-    outline: none;
-    background: #ffffff;
-    transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
   }
-
-  textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px rgba(0,80,214,0.55);
-    background: #ffffff;
-  }
-
   .btn-row {
-    margin: 10px 0 4px;
+    margin: 10px 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
   }
-
   button {
     flex: 1;
     min-width: 140px;
-    padding: 9px 16px;
-    border-radius: 999px;
+    padding: 10px 16px;
+    border-radius: 8px;
     border: none;
-    background: var(--accent);
-    color: white;
-    font-size: 14px;
-    font-weight: 500;
+    background: #111;
+    color: #fff;
+    font-size: 15px;
     cursor: pointer;
-    letter-spacing: 0.02em;
-    box-shadow: 0 8px 14px rgba(0,80,214,0.22);
-    transition: background 0.16s ease, transform 0.08s ease, box-shadow 0.16s ease, opacity 0.1s ease;
   }
-
   button:hover {
-    background: var(--accent-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 12px 22px rgba(0,80,214,0.26);
+    background: #333;
   }
-
-  button:active {
-    transform: translateY(0);
-    box-shadow: 0 6px 10px rgba(0,80,214,0.18);
-  }
-
-  button.secondary {
-    background: #f3f4ff;
-    color: #1e293b;
-    box-shadow: none;
-    border: 1px solid #d8def6;
-  }
-  button.secondary:hover {
-    background: #e4e7ff;
-  }
-
-  /* “Add Mapping” special styling */
-  .btn-add-mapping {
-    background: #002c80;
-    color: #ffd700;
-    border-radius: 999px;
-    box-shadow: 0 10px 18px rgba(0,44,128,0.35);
-    padding-inline: 20px;
-    flex: 0 0 auto;
-  }
-  .btn-add-mapping:hover {
-    background: #001f5a;
-  }
-
   hr {
-    border: none;
-    border-top: 1px solid #e2e2ee;
-    margin: 18px 0;
+    margin: 24px 0;
   }
-
-  .docx-hint {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 4px;
+  @media (max-width: 600px) {
+    button { flex: 100%; }
   }
+</style>
+</head>
 
-  @media (max-width: 720px) {
-    .app-shell {
-      padding: 18px 10px 42px;
-      align-items: stretch;
-    }
-    .container {
-      padding: 16px 14px 20px;
-      border-radius: 18px;
-    }
-    .app-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .btn-row {
-      flex-direction: column;
-    }
-    button {
-      flex: none;
-      width: 100%;
-    }
-  }
 
-  /* ===== PASSWORD OVERLAY ===== */
+
+<!-- ===================== PASSWORD SECURITY SCREEN ===================== -->
+
+
+
+<style>
+  /* Dark overlay */
   #lockScreen {
     position: fixed;
     inset: 0;
-    background: radial-gradient(circle at top, rgba(255,255,255,0.15), rgba(0,0,0,0.6));
-    backdrop-filter: blur(16px);
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(8px);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 9999;
   }
 
+  /* Main box */
   #lockBox {
-    background: rgba(255,255,255,0.96);
-    color: #111827;
+    background: #111;
+    color: white;
     width: 420px;
     max-width: 90%;
-    padding: 26px 24px 24px;
-    border-radius: 24px;
+    padding: 32px;
+    border-radius: 18px;
     text-align: center;
-    box-shadow: 0 20px 40px rgba(15,23,42,0.28);
-    border: 1px solid rgba(255,255,255,0.9);
-    animation: fadeIn 0.35s ease;
+    box-shadow: 0 0 32px rgba(0,0,0,0.4);
+    animation: fadeIn 0.4s ease;
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-18px) scale(0.98); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   #lockBox h2 {
     margin-top: 0;
-    font-size: 22px;
-    font-weight: 650;
+    font-size: 26px;
   }
 
   #attemptInfo {
-    margin: 8px 0 16px;
-    font-size: 13px;
-    color: #6b7280;
+    margin: 10px 0 18px;
+    font-size: 14px;
+    opacity: 0.8;
   }
 
   #keyInputBox {
     position: relative;
     width: 100%;
-    margin-top: 4px;
   }
 
   #securityKey {
     width: 100%;
-    padding: 11px 42px 11px 14px;
-    border-radius: 999px;
-    border: 1px solid #d4d4dd;
+    padding: 12px 48px 12px 14px;
+    border-radius: 8px;
+    border: none;
     outline: none;
-    font-size: 16px;
-    background: #f9fafb;
-    transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
-  }
-
-  #securityKey:focus {
-    border-color: #0050d6;
-    background: #ffffff;
-    box-shadow: 0 0 0 1px rgba(0,80,214,0.45);
+    font-size: 17px;
+    box-sizing: border-box;
   }
 
   #toggleEye {
@@ -298,156 +138,28 @@
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 18px;
+    font-size: 22px;
     cursor: pointer;
     user-select: none;
   }
 
   #unlockBtn {
     width: 100%;
-    margin-top: 18px;
-    padding: 11px;
-    background: #0050d6;
+    margin-top: 22px;
+    padding: 12px;
+    background: #007bff;
     border: none;
     color: white;
-    border-radius: 999px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 15px;
-    font-weight: 500;
-    box-shadow: 0 12px 24px rgba(0,80,214,0.35);
-    transition: background 0.16s ease, transform 0.08s ease, box-shadow 0.16s ease;
+    font-size: 17px;
   }
 
   #unlockBtn:hover {
-    background: #003b9f;
-    transform: translateY(-1px);
-    box-shadow: 0 16px 30px rgba(0,80,214,0.40);
-  }
-
-  #unlockBtn:active {
-    transform: translateY(0);
-    box-shadow: 0 8px 16px rgba(0,80,214,0.28);
-  }
-
-  /* ===== ADD-MAPPING MODAL ===== */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15,23,42,0.55);
-    backdrop-filter: blur(12px);
-    display: none; /* default hidden */
-    justify-content: center;
-    align-items: center;
-    z-index: 999999;
-  }
-
-  .modal-box {
-    width: 420px;
-    max-width: 90%;
-    background: #ffffff;
-    padding: 24px 22px 18px;
-    border-radius: 22px;
-    color: #0f172a;
-    box-shadow: 0 18px 36px rgba(15,23,42,0.35);
-    border: 1px solid rgba(255,255,255,0.9);
-    animation: fadeInScale 0.25s ease-out;
-  }
-
-  @keyframes fadeInScale {
-    from { opacity: 0; transform: translateY(10px) scale(0.96); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  .modal-box h2 {
-    text-align: center;
-    margin-top: 0;
-    margin-bottom: 14px;
-    font-size: 18px;
-    font-weight: 600;
-  }
-
-  .modal-box label {
-    font-size: 13px;
-    margin-top: 6px;
-    display: block;
-    color: #111827;
-  }
-
-  .modal-box input {
-    width: 100%;
-    padding: 9px 11px;
-    border-radius: 11px;
-    border: 1px solid #d4d4dd;
-    margin-top: 4px;
-    margin-bottom: 6px;
-    font-size: 15px;
-    outline: none;
-    background: #f9fafb;
-    transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
-  }
-
-  .modal-box input:focus {
-    border-color: #0050d6;
-    background: #ffffff;
-    box-shadow: 0 0 0 1px rgba(0,80,214,0.45);
-  }
-
-  .modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  .modal-buttons button {
-    flex: 0 0 auto;
-    min-width: 90px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    font-size: 14px;
-    cursor: pointer;
-    border: none;
-  }
-
-  .modal-buttons button:first-child {
-    background: #f3f4f6;
-    color: #111827;
-  }
-
-  .modal-buttons button:first-child:hover {
-    background: #e5e7eb;
-  }
-
-  .modal-buttons .blue {
-    background: #0050d6;
-    color: #ffffff;
-    box-shadow: 0 10px 18px rgba(0,80,214,0.28);
-  }
-
-  .modal-buttons .blue:hover {
-    background: #003ea6;
-  }
-
-  /* Footer watermark */
-  #kgFooter {
-    position: fixed;
-    bottom: 10px;
-    right: 12px;
-    font-size: 11px;
-    font-family: system-ui, -apple-system, "SF Pro Text", sans-serif;
-    color: #6b7280;
-    background: rgba(255,255,255,0.85);
-    padding: 5px 9px;
-    border-radius: 999px;
-    border: 1px solid #e5e7eb;
-    pointer-events: none;
+    background: #0065d3;
   }
 </style>
-</head>
 
-<body>
-
-<!-- ================= PASSWORD SECURITY OVERLAY ================= -->
 <div id="lockScreen">
   <div id="lockBox">
     <h2>🔐 Enter Security Key</h2>
@@ -462,145 +174,92 @@
   </div>
 </div>
 
-<!-- ================= MAIN APP SHELL ================= -->
-<div class="app-shell">
-  <div class="container">
-
-    <div class="app-header">
-      <div>
-        <div class="app-title">Font Converter – Unicode ⇄ Amar</div>
-        <div class="app-subtitle">Internal KG & NB tool • Amar Hindi mapping engine</div>
-      </div>
-
-      <button class="btn-add-mapping" onclick="openAddMapping()">
-        ➕ Add Missing Mapping
-      </button>
-    </div>
-
-    <!-- CARD 1 – TEXT CONVERTER -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Text Conversion</div>
-        <div class="card-subtitle">Paste Unicode, convert to Amar codes and copy for Word (AmrHindi font).</div>
-      </div>
-
-      <label><b>Unicode Input</b></label>
-      <textarea id="unicodeInput" placeholder="Type or paste Unicode text here…"></textarea>
-
-      <div class="btn-row">
-        <button onclick="handleUnicodeToAmar()">Unicode → Amar</button>
-        <button class="secondary" onclick="copyAmar()">Copy Amar Output</button>
-      </div>
-
-      <label><b>Amar Output</b></label>
-      <textarea id="amarOutput" placeholder="Amar Hindi output will appear here…"></textarea>
-    </div>
-
-    <!-- CARD 2 – DOCX CONVERTER -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">DOCX Converter</div>
-        <div class="card-subtitle">Upload Unicode .docx → download Amar .docx with AmrHindi applied on runs.</div>
-      </div>
-
-      <input type="file" id="docxFile" accept=".docx" />
-      <div class="btn-row" style="margin-top:10px;">
-        <button onclick="convertDocx()">Convert & Download DOCX</button>
-      </div>
-
-      <div class="docx-hint">
-        Tip: Open the converted file in Word – the text will already be in Amar codes with <b>AmrHindi</b> font.
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ================= ADD-MAPPING MODAL ================= -->
-<div id="addMappingModal" class="modal-overlay">
-  <div class="modal-box">
-    <h2>➕ Add Missing Mapping</h2>
-
-    <label>Unicode (Left side)</label>
-    <input id="modalUnicode" type="text" placeholder="Enter Unicode…" />
-
-    <label>Amar Output (Right side)</label>
-    <input id="modalAmar" type="text" placeholder="Enter Amar…" />
-
-    <label>Security Key</label>
-    <input id="modalKey" type="password" placeholder="Enter security key…" />
-
-    <div class="modal-buttons">
-      <button onclick="closeAddMapping()">Cancel</button>
-      <button class="blue" onclick="saveNewMapping()">Save Mapping</button>
-    </div>
-  </div>
-</div>
-
-<!-- FOOTER WATERMARK -->
-<div id="kgFooter">
-  Copyright@2025 by KG & NB! This module cannot be used commercially and without permission.
-</div>
-
-<!-- =================== ALL JAVASCRIPT LOGIC =================== -->
 <script>
-/* ============================================================
-   PASSWORD LOCK LOGIC
-============================================================ */
-const CORRECT_KEY = "251479";
-let attempts = 3;
+document.addEventListener("DOMContentLoaded", () => {
 
-const lockScreen = document.getElementById("lockScreen");
-const keyInput   = document.getElementById("securityKey");
-const attemptInfo = document.getElementById("attemptInfo");
+  const CORRECT_KEY = "N251479@";
+  let attempts = 3;
 
-document.getElementById("toggleEye").onclick = () => {
-  keyInput.type = keyInput.type === "text" ? "password" : "text";
-};
+  const lockScreen = document.getElementById("lockScreen");
+  const keyInput   = document.getElementById("securityKey");
+  const attemptInfo = document.getElementById("attemptInfo");
+  const unlockBtn = document.getElementById("unlockBtn");
+  const toggleEye = document.getElementById("toggleEye");
 
-keyInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") unlock();
-});
+  // 👁 Eye toggle
+  toggleEye.onclick = () => {
+    keyInput.type = keyInput.type === "text" ? "password" : "text";
+  };
 
-document.getElementById("unlockBtn").onclick = unlock;
+  // ✅ AUTO-UNLOCK while typing (NO click needed)
+  keyInput.addEventListener("input", () => {
+    if (keyInput.value.trim() === CORRECT_KEY) {
+      unlock(true);
+    }
+  });
 
-function unlock() {
-  const val = keyInput.value.trim();
+  // ENTER key
+  keyInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") unlock();
+  });
 
-  if (val === CORRECT_KEY) {
-    lockScreen.style.display = "none";
-    return;
+  // Button click
+  unlockBtn.onclick = () => unlock();
+
+  function unlock(auto = false) {
+    const val = keyInput.value.trim();
+
+    if (val === CORRECT_KEY) {
+      lockScreen.style.display = "none";
+      return;
+    }
+
+    if (auto) return; // don't reduce attempts while typing
+
+    attempts--;
+    attemptInfo.innerHTML = `You have <b>${attempts}</b> attempts remaining`;
+    keyInput.value = "";
+
+    if (attempts <= 0) {
+      alert("Access denied. Closing.");
+      window.close();
+      location.href = "about:blank";
+    }
   }
 
-  attempts--;
-  attemptInfo.innerHTML = `You have <b>${attempts}</b> attempts remaining`;
-  keyInput.value = "";
-
-  if (attempts <= 0) {
-    alert("Access denied. Browser will now close this tab.");
-    window.close();
-    location.href = "about:blank"; // fallback
-  }
-}
-
-/* Close add-mapping modal on ESC */
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") closeAddMapping();
 });
+</script>
 
-/* ============================================================
-   ADD-MAPPING MODAL OPEN/CLOSE
-============================================================ */
-function openAddMapping() {
-  document.getElementById("modalUnicode").value = "";
-  document.getElementById("modalAmar").value = "";
-  document.getElementById("modalKey").value = "";
-  document.getElementById("addMappingModal").style.display = "flex";
-}
 
-function closeAddMapping() {
-  document.getElementById("addMappingModal").style.display = "none";
-}
+
+<body>
+
+
+
+<div class="container">
+  <h2>Font Converter : Unicode ---> Amar</h2>
+
+  <label><b>Unicode Input:</b></label>
+  <textarea id="unicodeInput" placeholder="Type or paste Unicode text here..."></textarea>
+
+  <div class="btn-row">
+    <button onclick="handleUnicodeToAmar()">Unicode → Amar</button>
+
+    <button onclick="copyAmar()">Copy Amar Output</button>
+  </div>
+
+  <label><b>Amar Output:</b></label>
+  <textarea id="amarOutput" placeholder="Amar Hindi output will appear here..."></textarea>
+
+  <hr>
+
+  <h3>DOCX Upload (Unicode) → Amar DOCX Download</h3>
+  <input type="file" id="docxFile" accept=".docx" />
+  <button onclick="convertDocx()">Convert & Download DOCX</button>
+</div>
+
+<script>
+
 
 /* ============================================================
    PART 1 – BASE SIMPLE LETTER MAPPING (MAP_LETTERS)
@@ -635,7 +294,7 @@ const MAP_HALFA = {
   "ज्":"È","झ्":"É","ञ्":"Ê","ट्":"è","ठ्":"T`","ड्":"é","ढ्":"F",
   "ण्":"&","त्":"Ë","थ्":"Ì","ध्":"Í","न्":"N","प्":"Î","श्‍":"Ü","स्":"á","ष्":"à",
   "फ्":"Ï","ब्":"Ñ","म्":"M","भ्":"Ò","ल्":"Ø","व्":"Û","व्":"Û","व्":"Û","व्":"Û",
-  "र्":"r`"
+  "र्":"r`"   // reph form
 };
 
 /* ============================================================
@@ -656,118 +315,94 @@ const MAP_HALFB = {
    PART 4 – CONJUNCTS (MAP_CONJ)
    Highest priority after words
 ============================================================ */
+
 const MAP_CONJ = {
+
   /* ==== Existing approved conjuncts ==== */
   "क्क":"˜","द्ग":"êî","द्घ":"êò","द्द":"¨","द्ब":"êô","द्भ":"êB","ष्ट्र":"àtö",
-  "द्म":"®","द्व":"êù","द्र":"dR","कृ":"™","क्त्र":"ÂR","क्त्व":"Âù",
-  "क्त्स":"Â`s","क्क्ष":"˜`†","क्क्ल":"˜¬","क्र":"kõ","द्ध":"©",
-  "भ्र":"BR","ह्न":"Hn","ट्र":"tö","ह्म":"Hm","ह्व":"Hv","ह्य":"HX","ह्ल":"Hl",
 
-  "क्ष्ण":"âx","स्क्ल्यै":"á›ÔY","द्म्य":"®Ô","स्फ्यक्त":"áÏXÂ","द्ब्यौ":"êôÔO","र्ज्ञ्य":"åX~",
-  "ग्न्य":"^NX","द्घ्म्य":"êò`MX","ह्न्य":"HNX",
-  "श्म्य":"ÜMX","द्ब्ध्य":"êô`ÍX","ष्प्त्य":"àÎËX","ह्ल्य":"HØX","र्त्र्यै":"ãXY~",
-  "द्ग्ध्य":"êî`ÍX","द्घ्र्य":"êòRÔ","द्श्र्य":"ê‰Ô","द्स्क्य":"êá#X",
-  "ण्म्य":"&MX","र्ण्ड्र्य":"&föÔ~","ष्क्ल्य":"à›Ô","र्त्स्व्य":"ËáÛX~","र्ग्ल्य":"^ØX~",
-  "र्श्र्य":"‰Ô~","र्स्थ्य":"áÌX~","र्ह्न्य":"HNX~","क्ल्यै":"›ÔY","द्र्य":"dRÔ",
-  "द्म्न्य":"®óÔ","ष्ण्य":"à&X","द्व्य":"êùÔ","र्ण्व्य":"&ÛX~","त्र्य":"ãX",
-  "र्ग्ष्ण्य":"^à&X~","द्ध्य":"©Ô",
+  /* ==== Complex clusters ==== */
+  "अस्तित्व":"AiáqËv","कृत्र्य":"™ãX",
+  "क्ष्ट्रि":"iâtö","क्ष्णि":"iâx","क्ष्प्रि":"iâpR","क्ष्म्यि":"iâMX",
+  "चित्र":"icZ","चिन्त":"icNq","चिन्ता":"icNqw",
+  "ज्ञ्त्रि":"iåZ","ज्ञ्र्यि":"iå~X","ज्ञ्स्त्रि":"iåáZ",
+  "त्रिष्ट":"iZàt","दिक्ष":"id@","दीक्षित":"dIi@q",
+  "दृष्टि":"d÷iàt",
+  "द्ध्रि":"i©R","द्ध्र्यि":"i©RÔ","र्श्त्र्यि":"iÜãX~","र्श्च्र्यि":"iÜcRÔ~",
 
-  "प्र":"pR","त्र":"Z","ज्ञ":"z","ज्ञा":"zw","ज्ञे":"zy",
-  "श्र":"‰","श्रे":"‰y","श्रा":"‰w",
+  "घ्न":"%n",
 
+"र्ल्क्रि":"iØkõ~","र्ल्पि":"iØp~","र्व्यि":"iÛX~","र्शि":"iS~","र्श्चि":"iÜc~","र्श्रि":"i‰~","र्श्र्यि":"i‰Ô~","र्षि":"i†~","र्ष्टि":"iàt~","र्ष्ट्रि":"iàtö~","र्ष्ट्र्यि":"iàtöÔ~","र्ष्ट्स्त्र्यि":"iàèáãX~","र्ष्ठ्र्यि":"iÄöÔ~","र्ष्णि":"iàx~","र्ष्त्र्यि":"iàãX~","र्सि":"is~",
+"र्स्त्न्यि":"iáËNXs~","र्स्प्र्यि":"iápRÔ~","र्त्म्यि":"iËMX~","र्द्भ्रि":"iêBR~","र्प्त्रि":"iÎZ~","र्ब्ध्रि":"iÑDR~","र्फ्र्यि":"iPõÔ~",
+
+  /* ==== r + i clusters (deduplicated) ==== */
+  "र्कि":"ik~","र्क्ति":"iÂ~","र्क्त्रि":"iÂR~","र्क्त्र्यि":"iÂRÔ~",
+  "र्क्रि":"ikõ~","र्क्लि":"i›~","र्क्षि":"i@~",
+  "र्क्ष्ट्रि":"iâtö~","र्क्ष्ट्र्यि":"iâtöÔ~",
+  "र्क्ष्णि":"iâx~","र्क्ष्ण्यि":"iâ&X~",
+
+  "र्चि":"ic~","र्च्छि":"iÇC~","र्च्यि":"iÇX~","र्च्रि":"icR~",
+
+  "र्झि":"iJ~","र्झ्रि":"iJR~",
+  "र्ञि":"i\\~","र्ञ्चि":"iÊc~",
+
+  "र्डि":"if~","र्ड्धि":"iéD~","र्ड्रि":"ifö~",
+
+  "र्णि":"ix~","र्ण्टि":"i&t~","र्ण्डि":"i&f~",
+
+  "र्पि":"ip~","र्प्ति":"iÎq~","र्प्त्र्यि":"iÎãX~","र्प्रि":"ipR~",
+
+  "र्फि":"iP~","र्फ्रि":"iPõ~",
+
+  "सृष्टि":"s÷iàt",
+"जः":"jÚ","रः":"rÚ","नः":"nÚ","क्ष्य":"âX","ज्ञप्तिः":"ziÎqÚ","ङ्क्ष्व":"çë`àv","ष्ट्र्य":"àtöÔ","भ्रंश्त्र":"BR<ÜZ",
+
+  /* ==== base conjuncts ==== */
+  "प्र":"pR","त्र":"Z","ज्ञ":"z","श्र":"‰",
   "द्य":"´","द्यु":"´u",
+  "स्त्र":"áZ","म्न":"Mn","ग्न":"^n",
+  "क्त":"Â","स्व":"áv","क्ष":"@","ग्र":"gR",
 
-  "स्त्र":"áZ","स्त्रा":"áZw","स्त्रै":"áZY",
+  /* ==== ऑ series ==== */
+  "क्तॉ":"Âw","त्रॉ":"Zw","द्रॉ":"dRw","क्रॉ":"kõw","ग्रॉ":"gRw",
+  "प्रॉ":"pRw","ब्रॉ":"bRw","ध्रॉ":"DRw","श्रॉ":"‰w",
 
-  "म्न":"Mn","ग्न":"^n","अग्नि":"Ai^n",
+  "कॉ":"kw","खॉ":"Kw","गॉ":"gw","घॉ":"Gw","ङॉ":"|w",
+  "चॉ":"cw","छॉ":"Cw","जॉ":"jw","झॉ":"Jw","ञॉ":"\\w",
 
-  "क्त":"Â","क्त्वा":"Âùw",
+  "टॉ":"tw","ठॉ":"Tw","डॉ":"fw","ढॉ":"Fw","णॉ":"xw",
+  "तॉ":"qw","थॉ":"Qw","दॉ":"dw","धॉ":"Dw","नॉ":"nw",
 
-  "स्व":"áv","स्वा":"ávw","स्वः":"ávÚ",
-
-  "ह्म":"Hm","क्ष":"@","ग्र":"gR",
-
-  /* --- स्त-series --- */
-  "स्त":"áq",
-  "स्त्व":"áËv",
-  "स्न":"án",
-  "स्म":"ám",
-  "स्क":"ák",
-  "स्क्र":"ákõ",
-  "स्ल":"ál",
-  "स्प":"áp",
-  "स्फ":"áP",
-  "स्क्ल":"á›",
-  "स्श":"áS",
-  "स्स":"ás",
-  "स्स्म":"áám",
-  "स्स्व":"ááv",
-  "स्स्क":"áák",
-  "स्स्न":"áán",
-  "स्स्प":"ááp",
-  "स्स्थ":"ááQ",
-  "स्स्व्य":"ááÛX",
-
-  /* --- श-series --- */
-  "श्न":"Ün",
-  "श्म":"Üm",
-  "श्व":"Üv",
-  "श्त":"Üq",
-  "श्ल":"Ül",
-  "श्क":"Ük",
-  "श्च":"Üc",
-  "श्ञ":"Ü\\",
-  "श्फ":"ÜP",
-  "श्ब":"Üb",
-  "श्भ":"ÜB",
-  "श्व्य":"ÜÛX",
-  "श्य":"ÜX",
-
-  /* --- ष-series --- */
-  "ष्ट":"àt",
-  "ष्ठ":"Ä",
-  "ष्ण":"àx",
-  "ष्प":"àp",
-  "ष्च":"àc",
-  "ष्व":"àv",
-  "ष्म":"àm",
-  "ष्र":"†R",
-
-  "क्तॉ":"Âw","त्रॉ":"Zw","द्रॉ":"dRw","क्रॉ":"kõw","ग्रॉ":"gRw","प्रॉ":"pRw","ब्रॉ":"bRw","ध्रॉ":"DRw","श्रॉ":"‰w",
-  "कॉ":"kw","खॉ":"Kw","गॉ":"gw","घॉ":"Gw","ङॉ":"|w","चॉ":"cw","छॉ":"Cw","जॉ":"jw","झॉ":"Jw",
-  "ञॉ":"\\w","टॉ":"tw","ठॉ":"Tw","डॉ":"fw","ढॉ":"Fw","णॉ":"xw","तॉ":"qw","थॉ":"Qw","दॉ":"dw","धॉ":"Dw",
-  "नॉ":"nw","पॉ":"pw","फॉ":"Pw","बॉ":"bw","भॉ":"Bw","मॉ":"mw","यॉ":"Xw","रॉ":"rw","लॉ":"lw","वॉ":"vw",
+  "पॉ":"pw","फॉ":"Pw","बॉ":"bw","भॉ":"Bw","मॉ":"mw",
+  "यॉ":"Xw","रॉ":"rw","लॉ":"lw","वॉ":"vw",
   "शॉ":"Sw","षॉ":"†w","सॉ":"sw","हॉ":"hw",
 
-  "यः":"XÚ","स्त्य":"áËX","ह्नः":"HnÚ","रः":"rÚ","ब्धः":"ÑDÚ","क्ष्म":"âm","र्थः":"Q~Ú",
-  "ष्ट्‌":"àt`","धः":"DÚ","थः":"QÚ","क्त्‌स्न":"Â`án","न्तः":"NqÚ","र्क्ष्य":"âX~","मः":"mÚ","क्त्य":"ÂÔ","क्तः":"ÂÚ","लः":"lÚ","ण्यः":"&XÚ","स्त्र्य":"áãX","स्म्य":"áMX","ह्र्":"hR`",
-
-  "द्धिः":"i©Ú","ष्प्र":"àpR","व्यः":"ÛXÚ","र्ण्क्त्र":"&ÂR~","पः":"pÚ",
-
-  /* --- final single --- */
+  /* --- final --- */
   "ण्य":"&X"
 };
 
-/* ZWJ-variant conjuncts for Word-style sequences (e.g. त्‍र, स्‍व) */
+
+// ZWJ-variant conjuncts for Word-style sequences (e.g. त्‍र, स्‍व)
 const MAP_CONJ_ZWJ = {};
 for (const key in MAP_CONJ) {
   if (key.includes("्")) {
+    // Insert ZWJ (U+200D) after every halant
     const zwjKey = key.replace(/्/g, "्‍");  // halant + ZWJ
     MAP_CONJ_ZWJ[zwjKey] = MAP_CONJ[key];
   }
 }
 
+
 /* ============================================================
    PART 5 – WORD EXCEPTIONS (MAP_WORDS)
+   Absolute top priority
 ============================================================ */
 const MAP_WORDS = {
-  "त्रिकूट":"iZkUt","रु":"{","त्रिपृष्ठ":"iZp÷Ä","त्रिवेणी":"iZvyxI","क्ल्यौ":"›ÔO","रू":"}","वः":"vÚ","नः":"nÚ",
-  "त्रिशूल":"iZSUl","त्व्य":"ËÛX","ऋषी":"ˆ†I","षी":"†I","म्र":"mR","स्त्रैण्य":"áZY&X","क्य":"#X","ण्य":"&X","द्भ्र":"êBR",
+  "त्रिकूट":"iZkUt","रु":"{","त्रिपृष्ठ":"iZp÷Ä","त्रिवेणी":"iZvyxI","क्ल्यौ":"›ÔO","रू":"}",
+"त्रिशूल":"iZSUl","त्व्य":"ËÛX","ऋषी":"ˆ†I","षी":"†I","म्र":"mR","स्त्रैण्य":"áZY&X","क्य":"#X","ण्य":"&X","द्भ्र":"êBR","क्ष्म्य":"âMX","स्त्र्यः":"áãXÚ",
   "त्रासदी":"ZwsdI","ज्ञानेश्वर":"zwnyÜvr","ज्ञानकोश":"zwnkoS","र्ण":"x~","र्ण्य":"&X~","र्ण्व":"&v~","र्ण्म":"&m~","र्ण्न":"&n~","द्घ्न्य":"êòóÔ",
   "र्ण्ड":"&f~","र्ण्ध":"&D~","र्ण्ग":"&g~","र्ण्क":"&k~","र्ण्ठ":"&T~","र्ण्ट":"&t~","र्ण्प":"&p~","र्ण्भ":"&B~","र्ण्स":"&s~","र्ण्य":"&X~",
-  "र्ण्ष":"&†~","र्ण्ज":"&j~","र्ण्त":"&q~","र्ण्म्य":"&MX~","🔥 ":"🔥 ","र्न्य":"NX~","र्म्य":"MX~","र्स्य":"áX~","र्त्य":"ËX~",
-  "र्थ्य":"ÌX~","र्ज्य":"ÈX~","र्क्य":"#X~","र्व्य":"ÛX~","र्घ्य":"%X~","र्ह्य":"HX~","ह्र":"hR","ण्यः":"&XÚ","क्तिः":"iÂÚ","ह्र्य":"hRÔ","स्त्र्य":"áãX","क्ष्म्य":"âMX","स्त्र्य":"áãX","श्र्य":"‰Ô",
-
+  "र्ण्ष":"&†~","र्ण्ज":"&j~","र्ण्त":"&q~","र्ण्म्य":"&MX~","🔥 ":"🔥 ","र्न्य":"NX~","र्म्य":"MX~","र्स्य":"áX~","र्त्य":"ËX~","र्थ्य":"ÌX~","र्ज्य":"ÈX~","र्क्य":"#X~","र्व्य":"ÛX~","र्घ्य":"%X~","र्ह्य":"HX~",
   "विज्ञप्ति":"ivziÎq","प्रज्ञा":"pRzw","संज्ञा":"s<zw",
   "क्षरण":"@rx","क्षत्रिय":"@iZX","क्षमाशील":"@mwSIl",
   "उत्कृष्ट":"aË™àt","कृष्ण":"™àx","अक्षर":"A@r",
@@ -776,57 +411,33 @@ const MAP_WORDS = {
   "विद्युत":"iv´uq","न्यायालय":"NXwXwlX","उद्यान":"a´wn","द्युति":"´uiq",
   "अध्यात्म":"AÍXwËm","ध्य":"ÍX","ध्यान":"ÍXwn",
   "अध्ययन":"AÍXXn","अध्याय":"AÍXwX","द्घ्न":"êòó","द्ग्ध":"êî`D",
-
   "मध्यप्रदेश":"mÍXpRdyS","साध्य":"swÍX","त्व":"Ëv",
   "संस्कृतित्व":"s<á™iqËv","व्यक्तित्व":"ÛXiÂËv","स्त्रीत्व":"áZIËv",
   "पवित्रत्व":"pivZËv","आत्मत्व":"AwËmËv",
-
   "श्व":"Üv","श्वसन":"Üvsn","श्वास":"Üvws","श्वेत":"Üvyq","तः":"qÚ",
   "श्वान":"Üvwn","श्वेच्छा":"ÜvyÇCw",
-
   "अह्निका":"AiHnkw","प्रह्ण":"pRHx","दह्नि":"diHn","हिमालय":"ihmwlX",
   "उन्मेष":"aNmy†","उन्माद":"aNmwd","ब्रह्म":"bRHm","ब्रह्मा":"bRHmw",
-
   "स्त्र":"áZ","स्त्री":"áZI","स्त्रोत":"áZoq","स्त्रैण":"áZYx",
   "स्त्रैणता":"áZYxqw","स्त्रोतस्वर":"áZoqávr",
-
   "चमत्कारिक:":"cmËkwirk:","चिन्मय":"icNmX","मनन":"mnn",
   "अम्नाय":"AMnwX","निम्न":"inMn","स्मरण":"ámrx",
-
   "धात्वर्थ":"DwËvQ~","संयोजन":"s<Xojn",
   "दुग्धग्न":"du^D^n","राग्न्य":"rw^NX","अग्निदेव":"Ai^ndyv","अग्निकुंड":"Ai^nku<f",
-
   "उक्त":"aÂ","भुक्त":"BuÂ","युक्त":"XuÂ","दृष्ट":"d÷àt","भक्ति":"BiÂ",
   "स्वस्तिप्रजाभ्यः":"áviáqpRjwÒXÚ",
-
   "परिपालयन्तां":"pirpwlXNqw<","न्यायेन":"NXwXyn","मार्गेण":"mwgy~x",
   "गोब्राह्मणेभ्यः":"gobRwHmxyÒXÚ","शुभमस्तु":"SuBmáqu","नित्यं":"inËX<",
-  "लोकाः":"lokwÚ","समस्ताः":"smáqwÚ","सुखिनो":"suiKno","भवन्तु":"BvNqu",
-
-  "डॉक्टर":"fॉ#tr","स्र":"sR","क्ल":"›"
+  "लोकाः":"lokwÚ","समस्ताः":"smáqwÚ","सुखिनो":"suiKno","भवन्तु":"BvNqu","र्स्क्त्रि":"iáÂR~","र्स्क्र्यि":"iákõÔ~","क्ष्म":"âm","र्भ्र्यि":"iBRÔ~","र्म्य्रि":"iMXR~","र्ण्ड्रि":"i&fö~","र्स्त्र्मि":"iáãm~","र्स्क्ल्यि":"iá›Ô~","र्स्क्न्रि":"iá#nR~","र्स्त्र्वि":"iáãv~","र्क्र्यि":"ikõÔ~","र्क्ष्रि":"iâr~","र्श्क्रि":"iÜkõ~","र्श्त्रि":"iÜZ~","र्स्प्रि":"iápR~","डॉक्टर":"fॉ#tr","स्र":"sR","क्ल":"›"
 };
-
-/* ============================================================
-   USER_MAP MERGE – for new mappings saved from UI
-   (merged into MAP_CONJ before we build KEY arrays)
-============================================================ */
-let USER_MAP = {};
-try {
-  const stored = localStorage.getItem("userMappings");
-  if (stored) USER_MAP = JSON.parse(stored);
-} catch (e) {
-  USER_MAP = {};
-}
-for (const k in USER_MAP) {
-  MAP_CONJ[k] = USER_MAP[k];
-}
 
 /* ============================================================
    PART 6 – DERIVED HELPER SETS & CONSTANTS
 ============================================================ */
-const WORD_KEYS     = Object.keys(MAP_WORDS).sort((a,b)=>b.length - a.length);
-const CONJ_KEYS     = Object.keys(MAP_CONJ).sort((a,b)=>b.length - a.length);
+const WORD_KEYS = Object.keys(MAP_WORDS).sort((a,b)=>b.length - a.length);
+const CONJ_KEYS = Object.keys(MAP_CONJ).sort((a,b)=>b.length - a.length);
 const CONJ_KEYS_ZWJ = Object.keys(MAP_CONJ_ZWJ).sort((a,b)=>b.length - a.length);
+
 
 const CONJ_VALUES = new Set(Object.values(MAP_CONJ));
 const HALF_VALUES = new Set([
@@ -853,9 +464,16 @@ function isDevaConsonant(ch) {
 function hasNextConsonantAfterHalant(text, halantIndex) {
   for (let j = halantIndex + 1; j < text.length; j++) {
     const ch = text[j];
+
+    // ignore ZWJ/ZWNJ
     if (ch === "\u200c" || ch === "\u200d") continue;
+
     if (isDevaConsonant(ch)) return true;
+
+    // if non-Devanagari, stop scan
     if (!/[\u0900-\u097F]/.test(ch)) return false;
+
+    // matras/signs: continue scanning
   }
   return false;
 }
@@ -867,10 +485,13 @@ function swapI(text) {
   let arr = text.split("");
 
   for (let i = 0; i < arr.length; i++) {
+
     if (arr[i] !== "i") continue;
 
     let posC = i - 1;
     if (posC < 0) continue;
+
+    // do not cross whitespace
     if (/\s/.test(arr[posC])) continue;
 
     let moved = false;
@@ -891,6 +512,7 @@ function swapI(text) {
     }
     if (moved) continue;
 
+    // Now must be consonant or skip
     if (!SIMPLE_CONS_CHARS.has(arr[posC])) continue;
 
     // Rule (b): look for half block before consonant
@@ -920,57 +542,82 @@ function swapI(text) {
 }
 
 /* ============================================================
-   PART 8 – REPH FIX (r` → ~) with matra-aware behavior
+   PART 8 – REPH FIX (r` → ~ position) — Now respects badi-ee "I"
 ============================================================ */
+
 function fixReph(text) {
   let arr = text.split("");
   let i = 0;
 
-  const MATRA_AFTER = new Set(["w","I","u","U","÷","y","Y","o","O","ॅ"]);
+  const HALF_CONS = new Set([
+    "#","$","^","%","ç","Ç","C","È","É","Ê","è","T`","é","F",
+    "&","Ë","Ì","Í","N","Î","Ü","á","à","Ï","Ñ","M","Ò","Ø","Û","r`"
+  ]);
+
+  const FULL_CONS = new Set([
+    "K","g","G","|","c","C","j","J","\\","t","T","ड","f","F",
+    "x","q","Q","d","D","n","p","P","b","B","m","X","r",
+    "l","v","S","†","s","h","ù"
+  ]);
+
+  const MATRA_AFTER = new Set(["<",">","w","I","u","U","y","Y","o","O","÷"]);
 
   while (i < arr.length - 1) {
+
     if (arr[i] === "r" && arr[i + 1] === "`") {
 
-      // CASE 1: chhoti i already swapped before consonant
-      if (arr[i + 2] === "i") {
-        const iIndex = i + 2;
-        const consonantIdx = iIndex + 1;
+      /* ---------- CLAUSE 1 (i + FULL + optional MATRA) ---------- */
+      if (arr[i + 2] === "i" && FULL_CONS.has(arr[i + 3])) {
 
-        if (consonantIdx >= arr.length) {
-          arr.splice(i, 3, "i", "~");
-          continue;
+        // start scanning immediately after FULL consonant
+        let scan = i + 4;
+        let matraIdx = -1;
+
+        if (scan < arr.length && MATRA_AFTER.has(arr[scan])) {
+          matraIdx = scan;
         }
 
-        let insertAt = consonantIdx + 1;
-        while (insertAt < arr.length && MATRA_AFTER.has(arr[insertAt])) {
-          insertAt++;
-        }
-
-        let target = insertAt;
+        // remove r`
         arr.splice(i, 2);
-        target -= 2;
-        if (target < 0) target = 0;
-        arr.splice(target, 0, "~");
+
+        if (matraIdx !== -1) {
+          // adjust index after removal
+          matraIdx -= 2;
+
+          // insert AFTER matra
+          arr.splice(matraIdx + 1, 0, "~");
+        } else {
+          // no matra → after FULL consonant
+          arr.splice(i + 1, 0, "~");
+        }
         continue;
       }
 
-      // CASE 2: normal case – consonant then matras
-      let consonantIdx = i + 2;
-      if (consonantIdx >= arr.length) {
-        arr.splice(i, 2, "~");
+      /* ---------- CLAUSE 3: HALF → FULL → MATRA ---------- */
+      let halfIdx = i + 2;
+      let fullIdx = halfIdx + 1;
+      let matraIdx = fullIdx + 1;
+
+      if (
+        HALF_CONS.has(arr[halfIdx]) &&
+        FULL_CONS.has(arr[fullIdx]) &&
+        MATRA_AFTER.has(arr[matraIdx])
+      ) {
+        arr.splice(i, 2);
+        matraIdx -= 2;
+        arr.splice(matraIdx + 1, 0, "~");
         continue;
       }
 
-      let insertAt = consonantIdx + 1;
-      while (insertAt < arr.length && MATRA_AFTER.has(arr[insertAt])) {
-        insertAt++;
+      /* ---------- CLAUSE 2: FULL consonant ---------- */
+      if (FULL_CONS.has(arr[i + 2])) {
+        arr.splice(i, 2);
+        arr.splice(i + 1, 0, "~");
+        continue;
       }
 
-      let target = insertAt;
-      arr.splice(i, 2);
-      target -= 2;
-      if (target < 0) target = 0;
-      arr.splice(target, 0, "~");
+      /* ---------- fallback ---------- */
+      arr.splice(i, 2, "~");
       continue;
     }
 
@@ -980,8 +627,17 @@ function fixReph(text) {
   return arr.join("");
 }
 
+
+
 /* ============================================================
    PART 9 – FULL UNICODE → AMAR ENGINE WITH PRIORITY
+   Priority:
+   1. WORDS (MAP_WORDS)
+   2. CONJUNCTS (MAP_CONJ)
+   3. HALF A (if ANY consonant appears after halant)
+   4. HALF B (if NO consonant after halant)
+   5. LETTERS
+   then apply swapI + fixReph
 ============================================================ */
 function fullUnicodeToAmar(text) {
   let out = "";
@@ -1026,23 +682,27 @@ function fullUnicodeToAmar(text) {
       continue;
     }
 
+
     // 3 & 4. HALF A / HALF B with "any consonant after halant" rule
     if (next === "्") {
       const halfKey = ch + "्";
       const hasCons = hasNextConsonantAfterHalant(text, i + 1);
 
+      // If any consonant later → prefer HALF A when present
       if (hasCons && MAP_HALFA[halfKey]) {
         out += MAP_HALFA[halfKey];
         i += 2;
         continue;
       }
 
+      // If no consonant later → prefer HALF B when present
       if (!hasCons && MAP_HALFB[halfKey]) {
         out += MAP_HALFB[halfKey];
         i += 2;
         continue;
       }
 
+      // Fallbacks
       if (MAP_HALFA[halfKey]) {
         out += MAP_HALFA[halfKey];
         i += 2;
@@ -1065,10 +725,14 @@ function fullUnicodeToAmar(text) {
     i++;
   }
 
+  // apply i-swap and reph after mapping
   out = swapI(out);
   out = fixReph(out);
   return out;
 }
+
+
+
 
 /* ============================================================
    PART 10 – AMAR → UNICODE REVERSE (best-effort)
@@ -1109,40 +773,7 @@ function amarToUnicode(text) {
 }
 
 /* ============================================================
-   PART 11 – ADD NEW USER MAPPING (modal) – goes into MAP_CONJ
-============================================================ */
-function saveNewMapping() {
-  const uni  = document.getElementById("modalUnicode").value.trim();
-  const amar = document.getElementById("modalAmar").value.trim();
-  const key  = document.getElementById("modalKey").value.trim();
-
-  if (!uni || !amar) {
-    alert("❌ Unicode and Amar cannot be empty.");
-    return;
-  }
-
-  if (key !== CORRECT_KEY) {
-    alert("❌ Incorrect password");
-    return;
-  }
-
-  USER_MAP[uni] = amar;
-  try {
-    localStorage.setItem("userMappings", JSON.stringify(USER_MAP));
-  } catch(e) {}
-
-  MAP_CONJ[uni] = amar;
-  if (!CONJ_KEYS.includes(uni)) {
-    CONJ_KEYS.push(uni);
-    CONJ_KEYS.sort((a,b)=>b.length - a.length);
-  }
-
-  alert(`✅ Mapping Added:\n${uni} → ${amar}`);
-  closeAddMapping();
-}
-
-/* ============================================================
-   PART 12 – UI HANDLERS
+   PART 11 – UI HANDLERS
 ============================================================ */
 function handleUnicodeToAmar() {
   const u = document.getElementById("unicodeInput").value;
@@ -1163,8 +794,19 @@ function copyAmar() {
 }
 
 /* ============================================================
-   PART 13 – DOCX: Unicode → Amar (keep structure)
+   PART 12 – DOCX: Unicode → Amar (keep structure)
 ============================================================ */
+function xmlEscape(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+
+// DOCX converter using XML DOM (keeps formatting, solves corruption issues)
 async function convertDocx() {
   const fileInput = document.getElementById("docxFile");
   if (!fileInput || !fileInput.files.length) {
@@ -1175,67 +817,95 @@ async function convertDocx() {
   const file = fileInput.files[0];
 
   try {
+    // 1) Read DOCX as ArrayBuffer and load with JSZip
     const arrayBuffer = await file.arrayBuffer();
     const zip = await JSZip.loadAsync(arrayBuffer);
 
+    // 2) Get word/document.xml
     const docFile = zip.file("word/document.xml");
     if (!docFile) {
       alert("This file does not look like a valid DOCX (word/document.xml missing).");
       return;
     }
 
+    // 3) Read document.xml as UTF-8 string
     const xmlString = await docFile.async("string");
 
+    // 4) Parse XML using DOMParser (much safer than regex)
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlString, "application/xml");
 
+    // Check for parse errors
     if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
       console.error("XML parse error:", xmlDoc.getElementsByTagName("parsererror")[0]);
       alert("Error reading DOCX XML structure.");
       return;
     }
 
+    // 5) Get all <w:t> nodes (word text runs)
     const W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
     let textNodes = xmlDoc.getElementsByTagNameNS(W_NS, "t");
     if (!textNodes || textNodes.length === 0) {
+      // Fallback if namespace lookup fails
       textNodes = xmlDoc.getElementsByTagName("w:t");
     }
 
+    // 6) Convert text content of each node using your Unicode → Amar converter
     for (let i = 0; i < textNodes.length; i++) {
       const node = textNodes[i];
       const original = node.textContent || "";
-      const converted = fullUnicodeToAmar(original);
-      node.textContent = converted;
+      
+const converted = fullUnicodeToAmar(original);
+node.textContent = converted;
 
-      const runNode = node.parentNode; // <w:r>
-      if (runNode) {
-        let rPr = runNode.getElementsByTagNameNS(W_NS, "rPr")[0];
-        if (!rPr) {
-          rPr = xmlDoc.createElementNS(W_NS, "w:rPr");
-          runNode.insertBefore(rPr, node);
-        }
+// Insert <w:rPr><w:rFonts...>AmrHindi</w:rPr> before <w:t>
+const runNode = node.parentNode; // <w:r>
 
-        const rFonts = xmlDoc.createElementNS(W_NS, "w:rFonts");
-        rFonts.setAttribute("w:ascii", "AmrHindi");
-        rFonts.setAttribute("w:hAnsi", "AmrHindi");
-        rFonts.setAttribute("w:cs", "AmrHindi");
-        rPr.appendChild(rFonts);
-      }
+if (runNode) {
+    // Check if rPr already exists
+    let rPr = runNode.getElementsByTagNameNS(W_NS, "rPr")[0];
+
+    // If missing, create it
+    if (!rPr) {
+        rPr = xmlDoc.createElementNS(W_NS, "w:rPr");
+        runNode.insertBefore(rPr, node); // insert before <w:t>
     }
 
+    // Create rFonts
+    let rFonts = xmlDoc.createElementNS(W_NS, "w:rFonts");
+    rFonts.setAttribute("w:ascii", "AmrHindi");
+    rFonts.setAttribute("w:hAnsi", "AmrHindi");
+    rFonts.setAttribute("w:cs", "AmrHindi");
+
+    // Append inside <w:rPr>
+    rPr.appendChild(rFonts);
+}
+
+
+      node.textContent = converted;  // DOM will handle escaping
+    }
+
+
+
+
+    // 7) Serialize XML back to string
     const serializer = new XMLSerializer();
     const newXmlString = serializer.serializeToString(xmlDoc);
 
+    // 8) Write the updated XML back into the zip
     zip.file("word/document.xml", newXmlString);
 
+    // 9) Generate new DOCX blob
     const outBlob = await zip.generateAsync({
       type: "blob",
       mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     });
 
+    // 10) Timestamped filename
     const ts = new Date().toISOString().replace(/[^\d]/g, "").slice(0,14);
     const outName = file.name.replace(/\.docx$/i, "") + "_amar_" + ts + ".docx";
 
+    // 11) Download
     saveAs(outBlob, outName);
     alert("DOCX converted successfully.");
 
@@ -1244,14 +914,30 @@ async function convertDocx() {
     alert("Error converting DOCX. The file may be protected or not a standard DOCX.");
   }
 }
+
 </script>
+
+<div id="kgFooter">
+  Copyright@2025 by KG & NB! This module cannot be used commercially and without permission.
+</div>
+
+<style>
+#kgFooter {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 11px;
+    font-family: Arial, sans-serif;
+    color: #666;
+    background: rgba(255,255,255,0.7);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    pointer-events: none; /* prevents clicks */
+}
+</style>
+
 
 </body>
 </html>
-
-<script>
-setInterval(() => {
-  parent.postMessage({frameHeight: document.body.scrollHeight}, "*");
-}, 500);
-</script>
 
