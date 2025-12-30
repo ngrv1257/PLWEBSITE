@@ -1,26 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Font Converter – Unicode ⇄ Amar</title>
+<meta charset="UTF-8">
+<title>Amar Font Converter</title>
 
-<!-- DOCX handling from browser -->
+<!-- ================= FIREBASE SDK ================= -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
-
+<!-- ================= OPTIONAL DOCX SUPPORT ================= -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f3f3f3;
-    margin: 0;
-    padding: 0;
-  }
-  .container {
+/* ========== GLOBAL ========== */
+
+
+@font-face {
+  font-family: 'AmrHindi';
+  src: url('./fonts/AmrHindi.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ===== OUTPUT FONT MODES ===== */
+.font-amar {
+  font-family: 'AmrHindi', monospace;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.font-hindi {
+  font-family: Mangal, Nirmala UI, Kokila, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.font-english {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+
+
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg,#1e3c72,#f5c542);
+  min-height:100vh;
+}
+
+/* ========== AUTH UI ========== */
+#authScreen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.authBox{
+  width:420px;
+  max-width:95%;
+  padding:28px;
+  background:rgba(255,255,255,.25);
+  backdrop-filter:blur(14px);
+  border-radius:18px;
+  box-shadow:0 20px 40px rgba(0,0,0,.25);
+}
+input{
+  width:100%;
+  padding:12px;
+  margin-bottom:12px;
+  border-radius:8px;
+  border:none;
+}
+.passWrap{ position:relative; }
+.eye{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  cursor:pointer;
+}
+canvas{
+  display:block;
+  width:100%;
+  height:48px;
+  border-radius:8px;
+  background:#fff;
+  margin-bottom:10px;
+}
+button{
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+.primary{ background:#1e3c72;color:#fff; }
+.secondary{ background:#f5c542;color:#000; }
+.btnRow{ display:flex; gap:10px; }
+.tc{ font-size:13px; }
+
+/* ========== ENGINE WRAPPER ========== */
+#engine{
+  display:none;
+  background:#f3f3f3;
+  min-height:100vh;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= AUTH SCREEN ================= -->
+<div id="authScreen">
+  <div class="authBox">
+
+    <h2 id="formTitle">Login</h2>
+
+    <input id="email" type="email" placeholder="Email">
+
+    <div class="passWrap">
+      <input id="password" type="password" placeholder="Password">
+      <span class="eye" onclick="togglePwd('password')">👁</span>
+    </div>
+
+    <div class="passWrap" id="confirmWrap" style="display:none;">
+      <input id="confirmPassword" type="password" placeholder="Confirm Password">
+      <span class="eye" onclick="togglePwd('confirmPassword')">👁</span>
+    </div>
+
+    <p style="text-align:right;font-size:13px;">
+      <a href="#" onclick="forgotPassword()">Forgot password?</a>
+    </p>
+
+    <!-- CAPTCHA -->
+    <canvas id="captchaCanvas"></canvas>
+    <input id="captchaInput" placeholder="Enter CAPTCHA">
+    <button class="secondary" onclick="refreshCaptcha()">↻ Refresh</button>
+
+    <!-- T&C -->
+    <label class="tc" id="tncWrap" style="display:none;">
+      <input type="checkbox" id="acceptTnc">
+      I accept the <a href="terms.html" target="_blank">Terms & Conditions</a>
+    </label>
+
+    <p id="verifyMsg" style="display:none;font-size:13px;text-align:center;color:#1e3c72;">
+      ✅ Account created successfully.<br>
+      Please check your email and verify to login.
+    </p>
+
+    <div class="btnRow">
+      <button class="primary" id="submitBtn" onclick="submitForm()">Login</button>
+      <button class="secondary" id="switchBtn" onclick="switchMode()">Create Account</button>
+    </div>
+
+    <p id="msg" style="color:#c00;font-size:13px;text-align:center;"></p>
+  </div>
+</div>
+
+<!-- ================= ENGINE ================= -->
+<div id="engine">
+
+  <!-- 🔽🔽🔽 PASTE YOUR **ENTIRE AMAR ENGINE HTML HERE** 🔽🔽🔽 -->
+  <!-- Everything from <div class="container"> till your footer -->
+  <!-- DO NOT include <body>, <html>, or Firebase scripts -->
+
+
+<style>
+    .container {
     max-width: 960px;
     margin: 20px auto;
     background: #fff;
@@ -67,195 +217,371 @@
   @media (max-width: 600px) {
     button { flex: 100%; }
   }
-</style>
-</head>
+
+/* ================= TOP AREAS FLEX ================= */
+.topAreasWrap{
+  max-width:960px;
+  margin:16px auto;
+  display:flex;
+  flex-wrap:wrap;
+  gap:16px;
+}
+
+.areaCard{
+  width:calc(50% - 8px);
+  background:#ffffff;
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+  font-weight:600;
+  box-shadow:0 4px 14px rgba(0,0,0,0.1);
+}
+
+.areaCard.areaFull{
+  width:100%;
+}
 
 
 
-<!-- ===================== PASSWORD SECURITY SCREEN ===================== -->
-
-
-
-<style>
-  /* Dark overlay */
-  #lockScreen {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.72);
-    backdrop-filter: blur(8px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-  }
-
-  /* Main box */
-  #lockBox {
-    background: #111;
-    color: white;
-    width: 420px;
-    max-width: 90%;
-    padding: 32px;
-    border-radius: 18px;
-    text-align: center;
-    box-shadow: 0 0 32px rgba(0,0,0,0.4);
-    animation: fadeIn 0.4s ease;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  #lockBox h2 {
-    margin-top: 0;
-    font-size: 26px;
-  }
-
-  #attemptInfo {
-    margin: 10px 0 18px;
-    font-size: 14px;
-    opacity: 0.8;
-  }
-
-  #keyInputBox {
-    position: relative;
-    width: 100%;
-  }
-
-  #securityKey {
-    width: 100%;
-    padding: 12px 48px 12px 14px;
-    border-radius: 8px;
-    border: none;
-    outline: none;
-    font-size: 17px;
-    box-sizing: border-box;
-  }
-
-  #toggleEye {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 22px;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  #unlockBtn {
-    width: 100%;
-    margin-top: 22px;
-    padding: 12px;
-    background: #007bff;
-    border: none;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 17px;
-  }
-
-  #unlockBtn:hover {
-    background: #0065d3;
-  }
 </style>
 
-<div id="lockScreen">
-  <div id="lockBox">
-    <h2>🔐 Enter Security Key</h2>
-    <div id="attemptInfo">You have <b>3</b> attempts remaining</div>
+<div style="text-align:right; margin-bottom:10px;">
+  <button onclick="logout()" style="
+    background:#c0392b;
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:13px;
+  ">
+    🚪 Logout
+  </button>
+</div>
 
-    <div id="keyInputBox">
-      <input type="password" id="securityKey" placeholder="Enter key…" />
-      <span id="toggleEye">👁️</span>
-    </div>
 
-    <button id="unlockBtn">Unlock</button>
+<!-- ================= PLAN STATUS BAR ================= -->
+<div id="planBar" style="
+  max-width:960px;
+  margin:10px auto;
+  padding:14px 16px;
+  background:#1e3c72;
+  color:#fff;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:14px;
+">
+  <div>
+    <strong>Plan:</strong>
+    <span id="planName">Free</span>
+    <span id="planMeta" style="opacity:.85; margin-left:8px;">
+      (Per Day Limit : 500 chars · 2 conversions · 0 DOCX)
+    </span>
+  </div>
+
+  <button id="upgradeBtn" disabled style="
+    background:#f5c542;
+    color:#000;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    font-size:13px;
+    cursor:not-allowed;
+    opacity:.7;
+  ">
+    Upgrade (Coming Soon)
+  </button>
+</div>
+
+
+
+
+<!-- ================= USAGE BAR ================= -->
+
+<div id="charLimitBar" style="
+  max-width:960px;
+  margin:12px auto;
+  padding:12px 16px;
+  background:#fff;
+  border-radius:10px;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+  font-size:13px;
+">
+  <div style="display:flex;justify-content:space-between;">
+    <strong>Daily Character Usage</strong>
+    <span id="charText">0 / 500</span>
+  </div>
+
+  <div style="
+    margin-top:8px;
+    height:8px;
+    background:#eee;
+    border-radius:6px;
+    overflow:hidden;
+  ">
+    <div id="charFill" style="
+      height:100%;
+      width:0%;
+      background:#4caf50;
+      transition:width .3s;
+    "></div>
+  </div>
+
+  <div id="charWarn" style="
+    display:none;
+    margin-top:6px;
+    color:#c0392b;
+    font-size:12px;
+  ">
+    ⚠ You are close to your daily limit.
   </div>
 </div>
 
+
+
+<!-- ================= SUBSCRIPTION PLAN UI ================= -->
+<div id="planBox" style="
+  max-width:960px;
+  margin:16px auto;
+  padding:16px;
+  background:#ffffff;
+  border-radius:12px;
+  box-shadow:0 4px 14px rgba(0,0,0,.1);
+">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <strong>Your Plan</strong>
+    <span id="currentPlanBadge"
+      style="padding:4px 10px;border-radius:12px;font-size:12px;background:#e0e0e0;">
+      Free
+    </span>
+  </div>
+
+  <div style="margin-top:12px;">
+<button
+  id="planHintBtn"
+  onclick="togglePlanDropdown()"
+  style="
+    width:100%;
+    padding:12px;
+    border-radius:8px;
+    border:1px dashed #999;
+    background:#fafafa;
+    color:#555;
+    font-size:14px;
+    cursor:pointer;
+  ">
+  Click to see all the plans & UPGRADE for More Benefits!! ▼
+</button>
+
+  </div>
+
+  <div id="planDropdown" style="display:none;margin-top:12px;">
+
+<!-- FREE -->
+<div class="planItem" onclick="selectPlan('free')">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <strong>Free</strong>
+    <strong>₹0 / month*</strong>
+  </div>
+  <div class="planMeta">Per Day Limit : 500 chars · 2 text-box conversions · 0 Ms-Word- *.Docx file Upload Conversion</div>
+</div>
+
+<!-- BASIC -->
+<div class="planItem" onclick="selectPlan('basic')">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <strong>Basic</strong>
+    <strong>₹200 / month*</strong>
+  </div>
+  <div class="planMeta">Per Day Limit : 1,000 chars · 10 text-box conversions · 2 Ms-Word- *.Docx file Upload Conversion</div>
+</div>
+
+<!-- PREMIUM -->
+<div class="planItem" onclick="selectPlan('premium')">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <strong>Premium</strong>
+    <strong>₹500 / month*</strong>
+  </div>
+  <div class="planMeta">Per Day Limit :  UNLIMITED USAGE !!</div>
+</div>
+
+    <button id="buyPlanBtn"
+      onclick="proceedToBuy()"
+      disabled
+      style="
+        width:100%;
+        margin-top:12px;
+        padding:10px;
+        border-radius:8px;
+        border:none;
+        background:#1e3c72;
+        color:#fff;
+        opacity:.5;
+        cursor:not-allowed;
+      ">
+      Proceed to Buy
+    </button>
+
+  </div>
+</div>
+
+
+<style>
+.planItem{
+  padding:10px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  margin-bottom:8px;
+  cursor:pointer;
+}
+.planItem:hover{
+  background:#f7f7f7;
+}
+.planMeta{
+  font-size:12px;
+  color:#555;
+}
+</style>
+
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+let selectedPlan = null;
 
-  const CORRECT_KEY = "N251479@";
-  let attempts = 3;
+const PLAN_META = {
+  free:    "500 chars · 2 conversions · 0 DOCX / day",
+  basic:   "1,000 chars · 10 conversions · 2 DOCX / day",
+  premium: "Unlimited usage"
+};
 
-  const lockScreen = document.getElementById("lockScreen");
-  const keyInput   = document.getElementById("securityKey");
-  const attemptInfo = document.getElementById("attemptInfo");
-  const unlockBtn = document.getElementById("unlockBtn");
-  const toggleEye = document.getElementById("toggleEye");
 
-  // 👁 Eye toggle
-  toggleEye.onclick = () => {
-    keyInput.type = keyInput.type === "text" ? "password" : "text";
-  };
+function togglePlanDropdown(){
+  const d = document.getElementById("planDropdown");
+  d.style.display = d.style.display === "none" ? "block" : "none";
+}
 
-  // ✅ AUTO-UNLOCK while typing (NO click needed)
-  keyInput.addEventListener("input", () => {
-    if (keyInput.value.trim() === CORRECT_KEY) {
-      unlock(true);
-    }
-  });
+function selectPlan(plan){
+  selectedPlan = plan;
 
-  // ENTER key
-  keyInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") unlock();
-  });
+  document.getElementById("currentPlanBadge").innerText =
+    plan.charAt(0).toUpperCase() + plan.slice(1);
 
-  // Button click
-  unlockBtn.onclick = () => unlock();
+  const btn = document.getElementById("buyPlanBtn");
 
-  function unlock(auto = false) {
-    const val = keyInput.value.trim();
-
-    if (val === CORRECT_KEY) {
-      lockScreen.style.display = "none";
-      return;
-    }
-
-    if (auto) return; // don't reduce attempts while typing
-
-    attempts--;
-    attemptInfo.innerHTML = `You have <b>${attempts}</b> attempts remaining`;
-    keyInput.value = "";
-
-    if (attempts <= 0) {
-      alert("Access denied. Closing.");
-      window.close();
-      location.href = "about:blank";
-    }
+  if(plan === "free"){
+    btn.disabled = true;
+    btn.style.opacity = ".5";
+    btn.style.cursor = "not-allowed";
+    btn.innerText = "Free Plan (Active)";
+  } else {
+    btn.disabled = false;
+    btn.style.opacity = "1";
+    btn.style.cursor = "pointer";
+    btn.innerText = `Proceed to Buy ${plan.charAt(0).toUpperCase()+plan.slice(1)}`;
   }
+}
 
-});
+function proceedToBuy(){
+  if(!selectedPlan || selectedPlan === "free") return;
+
+  alert(
+    `Proceeding to buy plan: ${selectedPlan.toUpperCase()}\n\n` +
+    PLAN_META[selectedPlan]
+  );
+
+  // 🔜 NEXT STEP: Razorpay integration will go here
+}
 </script>
 
 
 
-<body>
-
-
-
 <div class="container">
-  <h2>Font Converter : Unicode ---> Amar</h2>
+  <h2>Font Converter : English  ⇄ Hindi(Unicode) → Amar Hindi(Legacy)</h2>
 
-  <label><b>Unicode Input:</b></label>
+  <label><b>Input Text:</b></label>
   <textarea id="unicodeInput" placeholder="Type or paste Unicode text here..."></textarea>
 
-  <div class="btn-row">
-    <button onclick="handleUnicodeToAmar()">Unicode → Amar</button>
+<!-- ================= OUTPUT MODE ================= -->
+<div style="margin:10px 0;">
+  <label><b>Output Format:</b></label>
+  <select id="outputMode" style="
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:14px;
+  ">
+    <!-- options injected dynamically -->
+  </select>
+</div>
 
-    <button onclick="copyAmar()">Copy Amar Output</button>
+
+
+
+
+<div id="langWarn" style="
+  display:none;
+  margin-bottom:10px;
+  color:#c0392b;
+  font-size:13px;
+  font-weight:500;
+"></div>
+
+
+
+
+
+  <div class="btn-row">
+    <button onclick="handleUnicodeToAmar()">Click to Convert Text</button>
+
+    <button onclick="copyAmar()">Copy Output Text</button>
   </div>
 
-  <label><b>Amar Output:</b></label>
-  <textarea id="amarOutput" placeholder="Amar Hindi output will appear here..."></textarea>
+  <label><b>Translated Output:</b></label>
+  <textarea id="amarOutput" placeholder="Output will appear here..."></textarea>
 
   <hr>
 
-  <h3>DOCX Upload (Unicode) → Amar DOCX Download</h3>
-  <input type="file" id="docxFile" accept=".docx" />
-  <button onclick="convertDocx()">Convert & Download DOCX</button>
+<h3>Upload  Input File → Download File with Translation  (Only Ms-Word- *.docx supported)</h3>
+
+<input type="file" id="docxFile" accept=".docx" />
+
+<!-- ================= DOCX LANGUAGE STATUS (STEP A) ================= -->
+<div id="docxLangBox" style="
+  display:none;
+  margin-top:12px;
+  padding:12px;
+  border-radius:10px;
+  background:#f7f7f7;
+  border:1px solid #ccc;
+  font-size:14px;
+">
+
+  <div style="margin-bottom:8px;">
+    <strong>Detected DOCX Language:</strong>
+    <span id="docxDetectedLang" style="margin-left:6px;"></span>
+  </div>
+
+  <div>
+    <strong>Output Format:</strong>
+    <select id="docxOutputMode" style="
+      width:100%;
+      margin-top:6px;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #bbb;
+    ">
+      <!-- options injected dynamically -->
+    </select>
+  </div>
+</div>
+
+<button id="docxConvertBtn" onclick="convertDocx()" disabled
+  style="opacity:.5;cursor:not-allowed;margin-top:12px;">
+  Convert & Download DOCX
+</button>
+
+
 </div>
 
 <script>
@@ -330,7 +656,7 @@ const MAP_CONJ = {
   "दृष्टि":"d÷iàt",
   "द्ध्रि":"i©R","द्ध्र्यि":"i©RÔ","र्श्त्र्यि":"iÜãX~","र्श्च्र्यि":"iÜcRÔ~",
 
-  "घ्न":"%n",
+  "घ्न":"%n","द्ध":"©",
 
 "र्ल्क्रि":"iØkõ~","र्ल्पि":"iØp~","र्व्यि":"iÛX~","र्शि":"iS~","र्श्चि":"iÜc~","र्श्रि":"i‰~","र्श्र्यि":"i‰Ô~","र्षि":"i†~","र्ष्टि":"iàt~","र्ष्ट्रि":"iàtö~","र्ष्ट्र्यि":"iàtöÔ~","र्ष्ट्स्त्र्यि":"iàèáãX~","र्ष्ठ्र्यि":"iÄöÔ~","र्ष्णि":"iàx~","र्ष्त्र्यि":"iàãX~","र्सि":"is~",
 "र्स्त्न्यि":"iáËNXs~","र्स्प्र्यि":"iápRÔ~","र्त्म्यि":"iËMX~","र्द्भ्रि":"iêBR~","र्प्त्रि":"iÎZ~","र्ब्ध्रि":"iÑDR~","र्फ्र्यि":"iPõÔ~",
@@ -772,14 +1098,467 @@ function amarToUnicode(text) {
   return out;
 }
 
+
+
+
+/* ============================================================
+   LANGUAGE DETECTION (SAFE, STRICT)
+============================================================ */
+
+function detectInputLanguage(text) {
+  if (!text || !text.trim()) return null;
+
+  // Take a reasonable sample
+  const sample = text.slice(0, 200);
+
+  let hasDeva = false;
+  let hasLatin = false;
+
+  for (const ch of sample) {
+    const code = ch.charCodeAt(0);
+
+    // Hindi / Devanagari
+    if (code >= 0x0900 && code <= 0x097F) {
+      hasDeva = true;
+      continue;
+    }
+
+    // English letters
+    if (
+      (code >= 65 && code <= 90) ||     // A–Z
+      (code >= 97 && code <= 122)       // a–z
+    ) {
+      hasLatin = true;
+      continue;
+    }
+
+    // Digits
+    if (code >= 48 && code <= 57) continue;
+
+    // Whitespace
+    if (/\s/.test(ch)) continue;
+
+    // Common punctuation / smart punctuation
+    if (
+      ".,!?;:'\"()[]{}<>-–—_+/\\|@#$%^&*=`~₹•…".includes(ch)
+    ) {
+      continue;
+    }
+
+    // 🚫 Any other script → unsupported
+    return "unsupported";
+  }
+
+  // Priority: Hindi first
+  if (hasDeva) return "hindi";
+  if (hasLatin) return "english";
+
+  return "unsupported";
+}
+
+
+
+/* ============================================================
+   OUTPUT MODE CONTROLLER (AUTO UI) — FINAL
+============================================================ */
+function updateOutputModes(inputText){
+
+  const select = document.getElementById("outputMode");
+  if (!select) return;
+
+  select.innerHTML = "";
+
+  const lang = detectInputLanguage(inputText);
+
+  if (lang === "unsupported" || !lang) {
+    return;
+  }
+
+  const OPTIONS = {
+    hindi: [
+      { value: "h2a", label: "Hindi → Amar Hindi" },
+      { value: "h2e", label: "Hindi → English" }
+    ],
+    english: [
+      { value: "e2h", label: "English → Hindi" },
+      { value: "e2a", label: "English → Amar Hindi" }
+    ]
+  };
+
+  OPTIONS[lang].forEach(opt => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    select.appendChild(o);
+  });
+
+  // ✅ default selection + font
+  select.value = OPTIONS[lang][0].value;
+  applyOutputFont(select.value);
+}
+
+
+
+
+
+/* ============================================================
+   INITIALIZE OUTPUT MODES ON LOAD (⬅️ ADD THIS HERE)
+============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.getElementById("unicodeInput");
+  if (input) {
+    syncOutputUI();
+  }
+});
+
+
+
+
+
+
+function mapLangCode(lang) {
+  switch (lang) {
+    case "english": return "en";
+    case "hindi": return "hi";
+    default: return lang;
+  }
+}
+
+
+
+/* =========================================================
+   TRANSLATION CACHE (SESSION + MEMORY)
+========================================================= */
+
+const translationCache = new Map();
+
+function getTranslationCacheKey(from, to, text) {
+  // normalize text slightly to avoid duplicate keys
+  return `${from}|${to}|${text.trim()}`;
+}
+
+
+
+/* ============================================================
+   TRANSLATION ENGINE — MICROSOFT TRANSLATOR (RAPIDAPI)
+============================================================ */
+
+
+
+async function translateText({ text, from, to }) {
+  if (!text || !text.trim()) return text;
+
+  const LANG_MAP = {
+    english: "en",
+    hindi: "hi"
+  };
+
+  const cacheKey = getTranslationCacheKey(from, to, text);
+
+  if (translationCache.has(cacheKey)) {
+    return translationCache.get(cacheKey);
+  }
+
+  const sessionHit = sessionStorage.getItem(cacheKey);
+  if (sessionHit) {
+    translationCache.set(cacheKey, sessionHit);
+    return sessionHit;
+  }
+
+  try {
+    const url =
+      "https://api.mymemory.translated.net/get" +
+      "?q=" + encodeURIComponent(text) +
+      "&langpair=" + LANG_MAP[from] + "|" + LANG_MAP[to];
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Service unavailable");
+
+    const data = await response.json();
+    const translated = data?.responseData?.translatedText?.trim();
+
+    if (!translated) throw new Error("Empty translation");
+
+    translationCache.set(cacheKey, translated);
+    sessionStorage.setItem(cacheKey, translated);
+    return translated;
+
+  } catch (err) {
+    console.warn("Translation busy:", err);
+    throw new Error(
+      "Translation service is busy. Please retry in a moment."
+    );
+  }
+}
+
+
+
+/* ============================================================
+   STEP 4C — HINDI NORMALIZATION
+============================================================ */
+
+function normalizeHindi(text) {
+  return text.normalize("NFC");
+}
+
+
+
+
+
+async function processDocxNode({
+  text,
+  inputLang,
+  outputMode
+}) {
+  // Skip empty / symbols-only text
+  if (!/[A-Za-z\u0900-\u097F]/.test(text)) return text;
+
+  try {
+    switch (outputMode) {
+
+      case "h2e":
+        return await translateText({
+          text,
+          from: "hindi",
+          to: "english"
+        });
+
+      case "e2h":
+        return normalizeHindi(
+          await translateText({
+            text,
+            from: "english",
+            to: "hindi"
+          })
+        );
+
+      case "e2a": {
+        const hindi = await translateText({
+          text,
+          from: "english",
+          to: "hindi"
+        });
+        return fullUnicodeToAmar(normalizeHindi(hindi));
+      }
+
+      case "h2a":
+        return fullUnicodeToAmar(normalizeHindi(text));
+
+      default:
+        return text;
+    }
+
+  } catch (err) {
+    console.warn("DOCX translation busy:", err);
+
+    // 🔹 Soft fail: keep original text
+    return text;
+  }
+}
+
+
+
+
+function applyOutputFont(outputMode) {
+  const box = document.getElementById("amarOutput");
+  if (!box) return;
+
+  box.classList.remove("font-amar", "font-hindi", "font-english");
+
+  switch (outputMode) {
+    case "h2a":
+    case "e2a":
+      box.classList.add("font-amar");
+      break;
+
+    case "h2e":
+      box.classList.add("font-english");
+      break;
+
+    case "e2h":
+      box.classList.add("font-hindi");
+      break;
+
+    default:
+      box.classList.add("font-english");
+  }
+}
+
+/* ============================================================
+   TEXTBOX UI SYNC — FINAL STABLE VERSION
+============================================================ */
+function syncOutputUI() {
+  const input = document.getElementById("unicodeInput");
+  const select = document.getElementById("outputMode");
+  const btn = document.querySelector("button[onclick='handleUnicodeToAmar()']");
+  const warn = document.getElementById("langWarn");
+
+  if (!input || !select || !btn || !warn) return;
+
+  const text = input.value.trim();
+
+  // Reset UI
+  warn.style.display = "none";
+  warn.innerText = "";
+  select.innerHTML = "";
+  btn.disabled = true;
+  btn.style.opacity = "0.6";
+
+  if (!text) return;
+
+  const lang = detectInputLanguage(text);
+
+  // 🚫 Unsupported language
+  if (lang === "unsupported") {
+    warn.innerText =
+      "⚠️ Only English and Regular Hindi are supported at the moment.";
+    warn.style.display = "block";
+    return;
+  }
+
+  // ✅ Valid input → enable UI
+  btn.disabled = false;
+  btn.style.opacity = "1";
+
+  updateOutputModes(text);
+}
+
+
+
+
+
 /* ============================================================
    PART 11 – UI HANDLERS
+
 ============================================================ */
-function handleUnicodeToAmar() {
-  const u = document.getElementById("unicodeInput").value;
-  const a = fullUnicodeToAmar(u);
-  document.getElementById("amarOutput").value = a;
+
+document.getElementById("unicodeInput")
+  .addEventListener("input", syncOutputUI);
+
+document.getElementById("unicodeInput")
+  .addEventListener("paste", () => {
+    setTimeout(syncOutputUI, 0);
+  });
+
+
+
+
+
+async function handleUnicodeToAmar() {
+
+  const inputBox = document.getElementById("unicodeInput");
+  const outputBox = document.getElementById("amarOutput");
+  const modeSelect = document.getElementById("outputMode");
+
+  if (!inputBox || !outputBox || !modeSelect) {
+    alert("Conversion UI not initialized correctly.");
+    return;
+  }
+
+  // ✅ FIX-2: Normalize + count characters FIRST
+  const rawInput = inputBox.value || "";
+  const charsToConvert = countChars(rawInput);
+
+  if (charsToConvert === 0) {
+    alert("Please enter valid text to convert.");
+    return;
+  }
+
+  // 🔒 Check plan + limits ONLY after valid char count
+  const allowed = await canProceed("conversion");
+  if (!allowed) return;
+
+  const input = rawInput.trim();
+  const detectedLang = detectInputLanguage(input);
+
+  if (detectedLang === "unsupported") {
+    alert(
+      "Unsupported language detected.\n\n" +
+      "Only English and Regular Hindi are supported."
+    );
+    return;
+  }
+
+  const outputMode = modeSelect.value;
+  let output = "";
+
+  try {
+    switch (outputMode) {
+
+      case "h2a":
+        output = fullUnicodeToAmar(normalizeHindi(input));
+        break;
+
+      case "h2e":
+        output = await translateText({
+          text: input,
+          from: "hindi",
+          to: "english"
+        });
+        break;
+
+      case "e2h":
+        output = normalizeHindi(
+          await translateText({
+            text: input,
+            from: "english",
+            to: "hindi"
+          })
+        );
+        break;
+
+      case "e2a": {
+        const hindi = await translateText({
+          text: input,
+          from: "english",
+          to: "hindi"
+        });
+        output = fullUnicodeToAmar(normalizeHindi(hindi));
+        break;
+      }
+
+      default:
+        alert("Invalid output mode selected.");
+        return;
+    }
+
+  } catch (err) {
+    console.error("Conversion error:", err);
+    alert(
+      err.message ||
+      "Conversion failed. Please try again in a moment."
+    );
+    return;
+  }
+
+  // ✅ Set output + font
+  outputBox.value = output;
+  applyOutputFont(outputMode);
+
+  // ✅ Record correct usage (NO mismatch now)
+  const uid = auth.currentUser.uid;
+  const ref = db.collection("users").doc(uid);
+
+const internal = await isInternalUser(uid);
+if (!internal) {
+  await ref.update({
+    "usage.conversionsToday":
+      firebase.firestore.FieldValue.increment(1),
+    "usage.charsToday":
+      firebase.firestore.FieldValue.increment(charsToConvert)
+  });
 }
+
+
+
+
+  // 🔄 Refresh UI
+  await loadCurrentUser(uid);
+  renderUsageBar();
+}
+
+
+
 
 function handleAmarToUnicode() {
   const a = document.getElementById("amarOutput").value;
@@ -806,8 +1585,145 @@ function xmlEscape(str) {
 }
 
 
+
+
+
+function countCharsFromDocxXml(xmlDoc){
+  const W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+  let textNodes = xmlDoc.getElementsByTagNameNS(W_NS, "t");
+
+  if(!textNodes || !textNodes.length){
+    textNodes = xmlDoc.getElementsByTagName("w:t");
+  }
+
+  let total = 0;
+  for(let i = 0; i < textNodes.length; i++){
+    total += (textNodes[i].textContent || "").length;
+  }
+  return total;
+}
+
+
 // DOCX converter using XML DOM (keeps formatting, solves corruption issues)
-async function convertDocx() {
+
+
+async function analyzeDocxLanguage(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const zip = await JSZip.loadAsync(arrayBuffer);
+  const docFile = zip.file("word/document.xml");
+  if (!docFile) throw new Error("Invalid DOCX file");
+
+  const xmlString = await docFile.async("string");
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+
+  const W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+  let textNodes = xmlDoc.getElementsByTagNameNS(W_NS, "t");
+  if (!textNodes.length) textNodes = xmlDoc.getElementsByTagName("w:t");
+
+  let sample = "";
+
+  for (let i = 0; i < textNodes.length && sample.length < 300; i++) {
+    const txt = (textNodes[i].textContent || "").trim();
+
+    // 🔒 Ignore symbol-only / numeric-only runs
+    if (!/[A-Za-z\u0900-\u097F]/.test(txt)) continue;
+
+    sample += txt;
+  }
+
+  if (!sample) return "unsupported";
+
+  return detectInputLanguage(sample);
+}
+
+
+
+
+/* ============================================================
+   STEP D — DOCX FILE CHANGE HANDLER
+============================================================ */
+document.getElementById("docxFile")
+  .addEventListener("change", async (e) => {
+
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const box = document.getElementById("docxLangBox");
+  const langSpan = document.getElementById("docxDetectedLang");
+  const select = document.getElementById("docxOutputMode");
+  const btn = document.getElementById("docxConvertBtn");
+
+  // Reset UI
+  box.style.display = "none";
+  select.innerHTML = "";
+  btn.disabled = true;
+  btn.style.opacity = "0.6";
+  btn.style.cursor = "not-allowed";
+
+  try {
+    const detectedLang = await analyzeDocxLanguage(file);
+
+    // 🚫 Unsupported language
+    if (detectedLang === "unsupported") {
+      alert(
+        "Unsupported language detected in the uploaded file.\n\n" +
+        "Only English and Regular Hindi DOCX files are supported."
+      );
+      return;
+    }
+
+    // Show detected language
+    langSpan.innerText =
+      detectedLang === "hindi"
+        ? "Hindi (Unicode)"
+        : "English";
+
+    langSpan.dataset.lang = detectedLang;
+
+    const OPTIONS = {
+      hindi: [
+        { value: "h2a", label: "Hindi → Amar Hindi" },
+        { value: "h2e", label: "Hindi → English" }
+      ],
+      english: [
+        { value: "e2h", label: "English → Hindi" },
+        { value: "e2a", label: "English → Amar Hindi" }
+      ]
+    };
+
+    OPTIONS[detectedLang].forEach(opt => {
+      const o = document.createElement("option");
+      o.value = opt.value;
+      o.textContent = opt.label;
+      select.appendChild(o);
+    });
+
+    select.value = OPTIONS[detectedLang][0].value;
+
+    // Enable UI
+    box.style.display = "block";
+    btn.disabled = false;
+    btn.style.opacity = "1";
+    btn.style.cursor = "pointer";
+
+  } catch (err) {
+    console.error(err);
+    alert(
+      "Unable to read this DOCX file.\n\n" +
+      "The file may be corrupted or protected."
+    );
+  }
+});
+
+
+async function convertDocx(){
+
+  // 🔒 PLAN CHECK FIRST (prevents partial DOCX writes)
+  const allowed = await canProceed("docx");
+  if (!allowed) return;
+
+
   const fileInput = document.getElementById("docxFile");
   if (!fileInput || !fileInput.files.length) {
     alert("Please choose a DOCX file.");
@@ -817,131 +1733,914 @@ async function convertDocx() {
   const file = fileInput.files[0];
 
   try {
-    // 1) Read DOCX as ArrayBuffer and load with JSZip
+    /* ===============================
+       1️⃣ READ DOCX
+    =============================== */
     const arrayBuffer = await file.arrayBuffer();
     const zip = await JSZip.loadAsync(arrayBuffer);
 
-    // 2) Get word/document.xml
     const docFile = zip.file("word/document.xml");
     if (!docFile) {
-      alert("This file does not look like a valid DOCX (word/document.xml missing).");
+      alert("Invalid DOCX file.");
       return;
     }
 
-    // 3) Read document.xml as UTF-8 string
     const xmlString = await docFile.async("string");
-
-    // 4) Parse XML using DOMParser (much safer than regex)
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlString, "application/xml");
 
-    // Check for parse errors
     if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
-      console.error("XML parse error:", xmlDoc.getElementsByTagName("parsererror")[0]);
-      alert("Error reading DOCX XML structure.");
+      alert("Error reading DOCX content.");
       return;
     }
 
-    // 5) Get all <w:t> nodes (word text runs)
+    /* ===============================
+       2️⃣ COLLECT TEXT NODES
+    =============================== */
     const W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
     let textNodes = xmlDoc.getElementsByTagNameNS(W_NS, "t");
-    if (!textNodes || textNodes.length === 0) {
-      // Fallback if namespace lookup fails
+
+    if (!textNodes || !textNodes.length) {
       textNodes = xmlDoc.getElementsByTagName("w:t");
     }
 
-    // 6) Convert text content of each node using your Unicode → Amar converter
-    for (let i = 0; i < textNodes.length; i++) {
-      const node = textNodes[i];
-      const original = node.textContent || "";
-      
-const converted = fullUnicodeToAmar(original);
-node.textContent = converted;
+    /* ===============================
+       3️⃣ LANGUAGE DETECTION (ONCE)
+    =============================== */
+/* ===============================
+   3️⃣ LANGUAGE DETECTION (DOCX SAFE)
+   (already done on file upload)
+=============================== */
+const detectedLang =
+  document.getElementById("docxDetectedLang")?.dataset?.lang;
 
-// Insert <w:rPr><w:rFonts...>AmrHindi</w:rPr> before <w:t>
-const runNode = node.parentNode; // <w:r>
-
-if (runNode) {
-    // Check if rPr already exists
-    let rPr = runNode.getElementsByTagNameNS(W_NS, "rPr")[0];
-
-    // If missing, create it
-    if (!rPr) {
-        rPr = xmlDoc.createElementNS(W_NS, "w:rPr");
-        runNode.insertBefore(rPr, node); // insert before <w:t>
-    }
-
-    // Create rFonts
-    let rFonts = xmlDoc.createElementNS(W_NS, "w:rFonts");
-    rFonts.setAttribute("w:ascii", "AmrHindi");
-    rFonts.setAttribute("w:hAnsi", "AmrHindi");
-    rFonts.setAttribute("w:cs", "AmrHindi");
-
-    // Append inside <w:rPr>
-    rPr.appendChild(rFonts);
+if (!detectedLang) {
+  alert("Unable to detect DOCX language. Please re-upload the file.");
+  return;
 }
 
 
-      node.textContent = converted;  // DOM will handle escaping
+
+
+
+// 🔁 NEW: sync dropdown exactly like textbox
+
+
+    if (detectedLang === "unsupported") {
+      alert(
+        "Language not supported in DOCX.\n\n" +
+        "This converter supports only:\n" +
+        "• Regular Hindi (Unicode)\n" +
+        "• English (Roman)"
+      );
+      return;
     }
 
+    /* ===============================
+       4️⃣ CHARACTER COUNT + PLAN CHECK
+    =============================== */
+    const charCount = countCharsFromDocxXml(xmlDoc);
+ 
 
 
+    /* ===============================
+       5️⃣ DETERMINE OUTPUT MODE
+       (DEFAULT = Hindi → Amar)
+    =============================== */
+    const modeEl = document.getElementById("outputMode");
+    const outputMode =
+  document.getElementById("docxOutputMode")?.value || "h2a";
 
-    // 7) Serialize XML back to string
+
+    /* ===============================
+       6️⃣ PROCESS EACH TEXT NODE
+    =============================== */
+    for (let i = 0; i < textNodes.length; i++) {
+      const node = textNodes[i];
+      const original = node.textContent || "";
+
+     // Skip symbols-only or numeric-only runs
+if (!/[A-Za-z\u0900-\u097F]/.test(original)) continue;
+
+      const converted = await processDocxNode({
+        text: original,
+        inputLang: detectedLang,
+        outputMode
+      });
+
+      node.textContent = "";
+node.appendChild(
+  xmlDoc.createTextNode(converted)
+);
+
+    }
+
+    /* ===============================
+       7️⃣ SAVE BACK TO DOCX
+    =============================== */
     const serializer = new XMLSerializer();
     const newXmlString = serializer.serializeToString(xmlDoc);
-
-    // 8) Write the updated XML back into the zip
     zip.file("word/document.xml", newXmlString);
 
-    // 9) Generate new DOCX blob
     const outBlob = await zip.generateAsync({
       type: "blob",
-      mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      mimeType:
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     });
 
-    // 10) Timestamped filename
-    const ts = new Date().toISOString().replace(/[^\d]/g, "").slice(0,14);
-    const outName = file.name.replace(/\.docx$/i, "") + "_amar_" + ts + ".docx";
+    const ts = new Date()
+      .toISOString()
+      .replace(/[^\d]/g, "")
+      .slice(0, 14);
 
-    // 11) Download
+    const outName =
+      file.name.replace(/\.docx$/i, "") + "_converted_" + ts + ".docx";
+
     saveAs(outBlob, outName);
+
+    /* ===============================
+       8️⃣ UPDATE USAGE
+    =============================== */
+    const uid = auth.currentUser.uid;
+    const ref = db.collection("users").doc(uid);
+
+const internal = await isInternalUser(uid);
+if (!internal) {
+  await ref.update({
+    "usage.docxToday":
+      firebase.firestore.FieldValue.increment(1),
+    "usage.charsToday":
+      firebase.firestore.FieldValue.increment(charCount)
+  });
+}
+
+
+    await loadCurrentUser(uid);
+    renderUsageBar();
+
     alert("DOCX converted successfully.");
 
   } catch (err) {
     console.error("DOCX conversion error:", err);
-    alert("Error converting DOCX. The file may be protected or not a standard DOCX.");
+    alert(
+  "DOCX conversion could not be completed.\n\n" +
+  "Possible reasons:\n" +
+  "• Translation service is busy\n" +
+  "• Unsupported language in file\n" +
+  "• Protected or complex formatting\n\n" +
+  "Please try again after a moment."
+);
+
   }
 }
 
+
 </script>
 
+
+
+</div>
+
+<!-- ================= FOOTER ================= -->
 <div id="kgFooter">
-  Copyright@2025 by KG & NB! This module cannot be used commercially and without permission.
+  Copyright © 2025 KG & NB.
 </div>
 
 <style>
-#kgFooter {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    font-size: 11px;
-    font-family: Arial, sans-serif;
-    color: #666;
-    background: rgba(255,255,255,0.7);
-    padding: 4px 8px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    pointer-events: none; /* prevents clicks */
+#kgFooter{
+  position:fixed;
+  bottom:10px;
+  right:10px;
+  font-size:11px;
+  color:#666;
+  background:rgba(255,255,255,0.7);
+  padding:4px 8px;
+  border-radius:4px;
 }
 </style>
 
+<!-- ================= AUTH + CAPTCHA + SESSION SCRIPT ================= -->
+<script>
+/* ================= FIREBASE CONFIG ================= */
+/* 🔴 UPDATE THESE 3 VALUES ONLY */
+firebase.initializeApp({
+  apiKey: "AIzaSyA50_nDcVr1PllKi9aff6Awo4w7XQAs3qc",
+  authDomain: "amarfont-converter.firebaseapp.com",
+  projectId: "amarfont-converter"
+});
+
+
+
+const auth = firebase.auth();
+const db = firebase.firestore();   // ✅ ADD THIS LINE ONLY
+
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+/* ================= STATE ================= */
+let captchaValue="", isSignup=false, captchaFails=0;
+
+
+/* ================= DOM REFERENCES ================= */
+const acceptTnc = document.getElementById("acceptTnc");
+
+const submitBtn = document.getElementById("submitBtn");
+const captchaInput = document.getElementById("captchaInput");
+const formTitle = document.getElementById("formTitle");
+const switchBtn = document.getElementById("switchBtn");
+const confirmWrap = document.getElementById("confirmWrap");
+const tncWrap = document.getElementById("tncWrap");
+const verifyMsg = document.getElementById("verifyMsg");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const confirmPassword = document.getElementById("confirmPassword");
+
+
+
+
+
+
+/* =====================================================
+   STEP 2.2 — ENSURE + DAILY RESET USER USAGE
+===================================================== */
+
+/* =====================================================
+   🔹 GLOBAL USER CACHE
+===================================================== */
+let currentUser = null;
+let currentUserData = null;
+
+/* =====================================================
+   🔹 LOAD CURRENT USER DATA (ADD ONCE)
+===================================================== */
+async function loadCurrentUser(uid){
+  const snap = await db.collection("users").doc(uid).get();
+  currentUserData = snap.data();
+}
+
+async function renderPlanBar() {
+  if (!currentUserData || !currentUser) return;
+
+  const planNameEl = document.getElementById("planName");
+  const planMetaEl = document.getElementById("planMeta");
+  const upgradeBtn = document.getElementById("upgradeBtn");
+  const badgeEl = document.getElementById("currentPlanBadge");
+
+  if (!planNameEl || !planMetaEl) return;
+
+  // 🔓 INTERNAL ADMIN OVERRIDE (UI ONLY)
+  try {
+    const internal = currentUserData?._isInternal === true;
+    if (internal) {
+      planNameEl.innerText = "Admin";
+      planMetaEl.innerText = "(Unlimited access – Internal user)";
+
+      if (upgradeBtn) upgradeBtn.style.display = "none";
+      if (badgeEl) badgeEl.innerText = "Admin";
+
+      return;
+    }
+  } catch (e) {
+    console.error("Admin check failed in plan bar", e);
+  }
+
+  // -------------------------------
+  // NORMAL USER FLOW
+  // -------------------------------
+  const plan = currentUserData.plan || "free";
+
+  const PLAN_BAR_TEXT = {
+    free:    "Per Day Limit : 500 chars · 2 text-box conversions · 0 Ms-Word- *.Docx file Upload Conversion",
+    basic:   "Per Day Limit : 1,000 chars · 10 text-box conversions · 2 Ms-Word- *.Docx file Upload Conversion",
+    premium: "Per Day Limit : UNLIMITED USAGE !!"
+  };
+
+  planNameEl.innerText =
+    plan.charAt(0).toUpperCase() + plan.slice(1);
+
+  planMetaEl.innerText =
+    `(${PLAN_BAR_TEXT[plan] || PLAN_BAR_TEXT.free})`;
+
+  if (badgeEl) {
+    badgeEl.innerText =
+      plan.charAt(0).toUpperCase() + plan.slice(1);
+  }
+
+  if (upgradeBtn) {
+    upgradeBtn.style.display = "inline-block";
+  }
+}
+
+
+
+
+function renderUsageBar() {
+  if (!currentUserData || !currentUserData.usage) return;
+
+  const fill = document.getElementById("charFill");
+  const text = document.getElementById("charText");
+  const warn = document.getElementById("charWarn");
+
+  if (!fill || !text || !warn) return;
+
+  // 🔓 INTERNAL ADMIN → UNLIMITED
+  if (currentUserData._isInternal === true) {
+    fill.style.width = "100%";
+    fill.style.background = "#2ecc71";
+    text.innerText = "Unlimited";
+    warn.style.display = "none";
+    return;
+  }
+
+  const used = Number(currentUserData.usage.charsToday || 0);
+  const plan = currentUserData.plan || "free";
+  const limit =
+    PLAN_LIMITS[plan]?.charsPerDay ?? PLAN_LIMITS.free.charsPerDay;
+
+  if (limit === Infinity) {
+    fill.style.width = "100%";
+    fill.style.background = "#2ecc71";
+    text.innerText = "Unlimited";
+    warn.style.display = "none";
+    return;
+  }
+
+  const percent = Math.min(100, Math.round((used / limit) * 100));
+  fill.style.width = percent + "%";
+  fill.style.background = percent >= 90 ? "#e74c3c" : "#4caf50";
+  text.innerText = `${used} / ${limit}`;
+  warn.style.display = percent >= 90 ? "block" : "none";
+}
+
+
+
+
+
+
+/* =====================================================
+   STEP 2.1 + 2.2 — ENSURE USER USAGE + DAILY RESET
+===================================================== */
+async function ensureUserUsage(uid, email){
+  const ref = db.collection("users").doc(uid);
+  const snap = await ref.get();
+
+  const now = firebase.firestore.Timestamp.now();
+  const todayKey = new Date().toDateString(); // calendar day key
+
+  /* ---------------- FIRST TIME USER ---------------- */
+  if(!snap.exists){
+    await ref.set({
+      email,
+      plan: "free",
+      planExpiry: null,
+      usage: {
+        conversionsToday: 0,
+        docxToday: 0,
+        charsToday: 0,
+        lastReset: now,
+        lastResetKey: todayKey
+      },
+      createdAt: now
+    });
+
+    currentUserData = {
+      email,
+      plan: "free",
+      planExpiry: null,
+      usage: {
+        conversionsToday: 0,
+        docxToday: 0,
+        charsToday: 0,
+        lastReset: now,
+        lastResetKey: todayKey
+      }
+    };
+    return;
+  }
+
+  /* ---------------- EXISTING USER ---------------- */
+  const data = snap.data();
+  const updates = {};
+
+  // 🛡 Plan safety
+  if(!data.plan) updates.plan = "free";
+  if(data.planExpiry === undefined) updates.planExpiry = null;
+
+  // 🛡 Usage safety
+  if(!data.usage){
+    updates.usage = {
+      conversionsToday: 0,
+      docxToday: 0,
+      charsToday: 0,
+      lastReset: now,
+      lastResetKey: todayKey
+    };
+  } else {
+
+    // 🔁 DAILY RESET (SAFE + IDENTITY BASED)
+    if(data.usage.lastResetKey !== todayKey){
+      updates["usage.conversionsToday"] = 0;
+      updates["usage.docxToday"] = 0;
+      updates["usage.charsToday"] = 0;
+      updates["usage.lastReset"] = now;
+      updates["usage.lastResetKey"] = todayKey;
+    }
+
+    // Backfill missing fields (no overwrite)
+    if(data.usage.conversionsToday === undefined)
+      updates["usage.conversionsToday"] = 0;
+
+    if(data.usage.docxToday === undefined)
+      updates["usage.docxToday"] = 0;
+
+    if(data.usage.charsToday === undefined)
+      updates["usage.charsToday"] = 0;
+
+    if(!data.usage.lastReset)
+      updates["usage.lastReset"] = now;
+
+    if(!data.usage.lastResetKey)
+      updates["usage.lastResetKey"] = todayKey;
+  }
+
+  if(Object.keys(updates).length){
+    await ref.update(updates);
+  }
+
+  // 🔄 Refresh local cache
+await loadCurrentUser(uid);
+await renderPlanBar();
+renderUsageBar();
+
+}
+
+
+
+
+
+
+
+/* =====================================================
+   STEP 2.2 — RECORD USAGE
+===================================================== */
+async function recordUsage(type, chars = 0){
+  const uid = auth.currentUser.uid;
+  const ref = db.collection("users").doc(uid);
+
+  const updates = {};
+
+  if(type === "conversion"){
+    updates["usage.conversionsToday"] =
+      firebase.firestore.FieldValue.increment(1);
+  }
+
+  if(type === "docx"){
+    updates["usage.docxToday"] =
+      firebase.firestore.FieldValue.increment(1);
+  }
+
+  if(chars > 0){
+    updates["usage.charsToday"] =
+      firebase.firestore.FieldValue.increment(chars);
+  }
+
+  const internal = currentUserData?._isInternal === true;
+if (internal) return;
+
+await ref.update(updates);
+
+
+  await loadCurrentUser(uid);
+  renderUsageBar();
+}
+
+
+
+
+/* ================= PLAN LIMITS ================= */
+const PLAN_LIMITS = {
+  free: {
+    charsPerDay: 500,
+    conversionsPerDay: 2,
+    docxPerDay: 0
+  },
+  basic: {
+    charsPerDay: 1000,
+    conversionsPerDay: 10,
+    docxPerDay: 2
+  },
+  premium: {
+    charsPerDay: Infinity,
+    conversionsPerDay: Infinity,
+    docxPerDay: Infinity
+  }
+};
+
+
+
+
+
+
+async function checkCharLimit(incomingChars){
+  const user = auth.currentUser;
+  if (!user) return false;
+
+  // 🔓 INTERNAL ADMIN BYPASS
+  try {
+    const internal = await isInternalUser(user.uid);
+    if (internal) return true;
+  } catch (e) {
+    console.error("Internal check failed in checkCharLimit", e);
+  }
+
+  const snap = await db.collection("users").doc(user.uid).get();
+  if (!snap.exists) return false;
+
+  const data = snap.data();
+
+  // 💎 Paid plans = unlimited
+  if (data.plan && data.plan !== "free") return true;
+
+  const used = Number(data.usage?.charsToday || 0);
+  const limit = PLAN_LIMITS.free.charsPerDay;
+
+  // 🚫 BLOCK (FREE PLAN ONLY)
+  if (used + incomingChars > limit) {
+    alert(
+      `Daily character limit exceeded.\n\n` +
+      `Free plan limit: ${limit} characters/day\n` +
+      `Used today: ${used}\n` +
+      `Trying to convert: ${incomingChars}\n\n` +
+      `Please try tomorrow or upgrade your plan.`
+    );
+    return false;
+  }
+
+  return true;
+}
+
+
+
+
+async function isInternalUser(uid) {
+  try {
+    const snap = await db.collection("internal_users").doc(uid).get();
+    return snap.exists && snap.data()?.unlimited === true;
+  } catch (e) {
+    console.error("Internal user check failed", e);
+    return false;
+  }
+}
+
+
+
+
+/* =====================================================
+   STEP 2.3 — CHECK USAGE LIMIT
+===================================================== */
+async function canProceed(actionType) {
+  const user = auth.currentUser;
+  if (!user) return false;
+
+  // 🔓 INTERNAL USER BYPASS (HIGHEST PRIORITY)
+  const internal = await isInternalUser(user.uid);
+  if (internal) {
+    console.log("Internal admin – unlimited access");
+    return true;
+  }
+
+  // -------------------------------
+  // NORMAL USER FLOW BELOW
+  // -------------------------------
+  const snap = await db.collection("users").doc(user.uid).get();
+  if (!snap.exists) return false;
+
+  const data = snap.data();
+  const usage = data.usage || {};
+  const plan = data.plan || "free";
+  const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+
+  // Paid users = unlimited
+  if (plan !== "free") return true;
+
+  // ----- CONVERSION CHECK -----
+  if (actionType === "conversion") {
+    const text = document.getElementById("unicodeInput")?.value || "";
+    const charsToConvert = countChars(text);
+
+    if (charsToConvert === 0) {
+      alert("Please enter text to convert.");
+      return false;
+    }
+
+    if ((usage.charsToday || 0) + charsToConvert > limits.charsPerDay) {
+      alert(
+        `Daily character limit reached.\n\n` +
+        `Free plan allows ${limits.charsPerDay} characters per day.\n` +
+        `You have already used ${usage.charsToday || 0}.`
+      );
+      return false;
+    }
+  }
+
+  // ----- DOCX CHECK -----
+  if (actionType === "docx") {
+    if ((usage.docxToday || 0) >= limits.docxPerDay) {
+      alert(
+        `Daily DOCX limit reached.\n\n` +
+        `Free plan allows ${limits.docxPerDay} DOCX per day.`
+      );
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+
+
+
+function countChars(text){
+  if (!text) return 0;
+
+  // normalize Word junk
+  const clean = text
+    .replace(/\u00A0/g, " ")   // nbsp
+    .replace(/\u200B/g, "")    // zero-width
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return clean.length;
+}
+
+
+
+
+
+/* ================= AUTH STATE ================= */
+
+auth.onAuthStateChanged(async user => {
+  if (user && user.emailVerified) {
+    currentUser = user;
+
+    // 🔒 Ensure schema + daily reset
+    await ensureUserUsage(user.uid, user.email);
+
+   
+
+// 🔓 Cache admin flag ONCE
+currentUserData._isInternal = await isInternalUser(user.uid);
+
+await renderPlanBar();
+renderUsageBar();
+
+
+    document.getElementById("authScreen").style.display = "none";
+    document.getElementById("engine").style.display = "block";
+  } else {
+    currentUser = null;
+    currentUserData = null;
+
+    document.getElementById("authScreen").style.display = "flex";
+    document.getElementById("engine").style.display = "none";
+
+    refreshCaptcha();
+  }
+});
+
+
+/* ================= LOGIN ATTEMPT SECURITY ================= */
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCK_TIME_MS = 15 * 60 * 1000; // 15 minutes
+
+function getLoginState(){
+  return JSON.parse(sessionStorage.getItem("loginSec") || "{}");
+}
+
+function setLoginState(state){
+  sessionStorage.setItem("loginSec", JSON.stringify(state));
+}
+
+function isLoginLocked(){
+  const s = getLoginState();
+  if(!s.lockUntil) return false;
+  if(Date.now() > s.lockUntil){
+    sessionStorage.removeItem("loginSec");
+    return false;
+  }
+  return true;
+}
+
+function recordLoginFailure(){
+  const s = getLoginState();
+  s.failCount = (s.failCount || 0) + 1;
+
+  if(s.failCount >= MAX_LOGIN_ATTEMPTS){
+    s.lockUntil = Date.now() + LOCK_TIME_MS;
+  }
+
+  setLoginState(s);
+}
+
+function resetLoginFailures(){
+  sessionStorage.removeItem("loginSec");
+}
+
+
+
+/* ================= LOGOUT ================= */
+function logout(){
+  if(!confirm("Are you sure you want to logout?")) return;
+
+  auth.signOut().then(()=>{
+    captchaFails = 0;        // reset security state
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = "1";
+    captchaInput.value = "";
+    refreshCaptcha();
+    alert("Logged out successfully");
+  });
+}
+
+
+
+/* ================= CAPTCHA ================= */
+let lastRefresh = 0;
+
+function drawCaptcha(){
+  const c=document.getElementById("captchaCanvas"),x=c.getContext("2d");
+  c.width=300;c.height=50;
+  x.fillStyle="#fff";x.fillRect(0,0,300,50);
+  captchaValue="";
+  const ch="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  for(let i=0;i<6;i++) captchaValue+=ch[Math.floor(Math.random()*ch.length)];
+  for(let i=0;i<40;i++){
+    x.fillStyle=`rgba(0,0,0,${Math.random()})`;
+    x.fillRect(Math.random()*300,Math.random()*50,2,2);
+  }
+  x.textAlign="center";x.textBaseline="middle";
+  [...captchaValue].forEach((c,i)=>{
+    x.save();
+    x.translate(40+i*40,25);
+    x.rotate((Math.random()-.5)*.5);
+    x.font=`${22+Math.random()*6}px Arial`;
+    x.fillStyle="#1e3c72";
+    x.fillText(c,0,0);
+    x.restore();
+  });
+}
+
+function refreshCaptcha(){
+  if(Date.now() - lastRefresh < 1000) return;
+  lastRefresh = Date.now();
+  captchaInput.value = "";   // optional
+  drawCaptcha();
+}
+
+
+
+/* ================= UI ================= */
+function togglePwd(id){const e=document.getElementById(id);e.type=e.type==="password"?"text":"password";}
+
+function showMsg(t){
+  document.getElementById("msg").innerText = t;
+}
+
+
+function switchMode(){
+
+  submitBtn.disabled = false;
+  submitBtn.style.opacity = "1";
+  captchaFails = 0;
+
+  isSignup = !isSignup;   // ✅ ADD THIS LINE
+
+  formTitle.innerText=isSignup?"Create Account":"Login";
+  submitBtn.innerText=isSignup?"Sign Up":"Login";
+  switchBtn.innerText=isSignup?"Back to Login":"Create Account";
+  confirmWrap.style.display=isSignup?"block":"none";
+  tncWrap.style.display=isSignup?"block":"none";
+  verifyMsg.style.display="none";
+  showMsg(""); refreshCaptcha();
+}
+
+
+/* ================= SUBMIT (SECURITY HARDENED) ================= */
+function submitForm(){
+
+  /* ---------- CAPTCHA CHECK ---------- */
+  if(captchaInput.value.trim().toUpperCase() !== captchaValue){
+    captchaFails++;
+
+    // 🔒 Lock after 3 CAPTCHA failures
+    if(captchaFails >= 3){
+      showMsg("Too many failed attempts. Please refresh the page.");
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = "0.6";
+      return;
+    }
+
+    showMsg("Incorrect CAPTCHA");
+    refreshCaptcha();
+    return;
+  }
+
+  // ✅ CAPTCHA passed → reset counter
+  captchaFails = 0;
+
+  /* =================================================
+     SIGNUP FLOW
+  ================================================= */
+  if(isSignup){
+
+    if(password.value !== confirmPassword.value)
+      return showMsg("Passwords do not match");
+
+    if(!acceptTnc.checked)
+      return showMsg("Accept Terms & Conditions");
+
+    auth.createUserWithEmailAndPassword(
+      email.value.trim(),
+      password.value
+    )
+    .then(u=>{
+      // 📧 Send verification email
+      u.user.sendEmailVerification();
+
+      // 🔒 Disable submit to prevent re-click spam
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = "0.6";
+
+      verifyMsg.style.display = "block";
+      showMsg("");
+
+      // ⛔ Force logout until email verified
+      auth.signOut();
+    })
+    .catch(e=>{
+      showMsg(e.message);
+      refreshCaptcha();
+    });
+
+    return;
+  }
+
+  /* =================================================
+     LOGIN FLOW (BRUTE FORCE HARDENED)
+  ================================================= */
+
+  // 🔒 Check login lock (5 failures / 15 mins)
+  if(isLoginLocked()){
+    showMsg("Too many failed logins. Try again after 15 minutes.");
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(
+    email.value.trim(),
+    password.value
+  )
+  .then(r=>{
+    if(!r.user.emailVerified){
+      auth.signOut();
+      recordLoginFailure();      // ❌ count failed login
+      showMsg("Verify email first");
+      refreshCaptcha();
+      return;
+    }
+
+    // ✅ Successful login
+    resetLoginFailures();
+    showMsg("");
+  })
+  .catch(()=>{
+    recordLoginFailure();        // ❌ count failed login
+    showMsg("Invalid email or password");
+    refreshCaptcha();
+  });
+}
+
+
+
+/* ================= PASSWORD RESET ================= */
+function forgotPassword(){
+  if (!email.value.trim()) {
+    showMsg("Enter registered email first");
+    return;
+  }
+
+  auth.sendPasswordResetEmail(email.value.trim())
+    .then(() => {
+      showMsg("Password reset email sent. Check inbox / spam.");
+    })
+    .catch(err => {
+      showMsg(err.message);
+    });
+}
+
+
+/* ================= INIT ================= */
+window.onload=drawCaptcha;
+</script>
 
 </body>
 </html>
-
-
-
-
-
