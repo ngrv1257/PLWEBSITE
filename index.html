@@ -2,167 +2,121 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>PadhnaLikhna | Free Worksheets & Learning Tools</title>
+  <title>PadhnaLikhna | NCERT Learning for Classes 5–10</title>
 
   <!-- SEO -->
-  <meta name="description" content="Free worksheets, notes and learning tools for Classes 6–10. Trusted by students, parents and teachers.">
+  <meta name="description" content="NCERT-aligned learning platform for Classes 5 to 10 with videos, notes, worksheets and tools.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://www.padhnalikhna.com/">
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <!-- FONTS -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
 
-  <!-- Main CSS -->
+  <!-- MAIN CSS -->
   <link rel="stylesheet" href="css/style.css">
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
 
 <body>
 
 <!-- ================= HEADER ================= -->
-<header class="header">
+<header class="site-header">
   <div class="container header-flex">
+    <div class="logo">PadhnaLikhna</div>
 
-    <img src="images/logo.png" alt="PadhnaLikhna Logo" class="logo">
-
-    <nav class="nav">
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
       <a href="classes.html">Classes</a>
-      <a href="subjects.html">Subjects</a>
-      <a href="worksheets.html">Worksheets</a>
       <a href="tools.html">Tools</a>
+      <a href="converter.html">Converter</a>
 
-      <!-- 🔐 AUTH AREA -->
-      <a id="loginLink" href="login.html" class="btn-primary" style="display:none;">
-        Login
-      </a>
-
-      <div id="userBox" style="display:none;align-items:center;gap:10px;">
-        <span id="userEmail" style="font-size:13px;font-weight:600;"></span>
-        <button onclick="logoutUser()"
-          style="
-            padding:8px 12px;
-            border-radius:6px;
-            border:none;
-            background:#c0392b;
-            color:#fff;
-            cursor:pointer;
-            font-size:13px;
-          ">
-          Logout
-        </button>
-      </div>
+      <!-- LOGIN / LOGOUT -->
+      <a href="#" id="loginBtn">Login</a>
+      <a href="#" id="logoutBtn" class="hidden">Logout</a>
     </nav>
-
   </div>
 </header>
 
 <!-- ================= HERO ================= -->
 <section class="hero">
-  <div class="container hero-grid">
-    <div>
-      <h1>Learning Made Simple & Structured</h1>
-      <p>High-quality academic content, worksheets and tools for Classes 6–10.</p>
-      <a href="classes.html" class="btn-primary">Start Learning Free</a>
-      <a href="worksheets.html" class="btn-secondary">Explore Worksheets</a>
+  <div class="container">
+    <h1>NCERT Learning for Classes 5–10</h1>
+    <p class="subtitle">
+      Focused learning with videos, notes, worksheets and language tools.
+    </p>
+
+    <!-- CLASS / SUBJECT / CHAPTER SELECTOR -->
+    <div class="selector-box">
+      <select id="classSelect">
+        <option value="">Select Class</option>
+        <option value="class-5">Class 5</option>
+        <option value="class-6">Class 6</option>
+        <option value="class-7">Class 7</option>
+        <option value="class-8">Class 8</option>
+        <option value="class-9">Class 9</option>
+        <option value="class-10">Class 10</option>
+      </select>
+
+      <select id="subjectSelect" disabled>
+        <option value="">Select Subject</option>
+        <option value="english">English</option>
+        <option value="hindi">Hindi</option>
+        <option value="maths">Maths</option>
+        <option value="science">Science</option>
+        <option value="sst">SST</option>
+      </select>
+
+      <select id="chapterSelect" disabled>
+        <option value="">Select Chapter</option>
+        <option value="chapter-1">Chapter 1</option>
+        <option value="chapter-2">Chapter 2</option>
+      </select>
+
+      <button onclick="goToContent()">Go</button>
     </div>
-    <div class="hero-visual">
-      <!-- Illustration placeholder -->
+  </div>
+</section>
+
+<!-- ================= NEW CONTENT ================= -->
+<section class="content-section container">
+  <h2>Newly Added Content</h2>
+
+  <div class="card-grid">
+    <div class="card">
+      <small>Class 8 • Science</small>
+      <h3>Chemical Reactions</h3>
+    </div>
+
+    <div class="card">
+      <small>Class 6 • Hindi</small>
+      <h3>पानी की कहानी</h3>
     </div>
   </div>
 </section>
 
-<!-- ================= TRUST STRIP ================= -->
-<section class="trust">
-  <div class="container trust-grid">
-    <span>✔ Curriculum Aligned</span>
-    <span>✔ Teacher Friendly</span>
-    <span>✔ Mobile Ready</span>
-    <span>✔ Free + Premium</span>
-  </div>
-</section>
+<!-- ================= POPULAR CONTENT ================= -->
+<section class="content-section container">
+  <h2>Most Viewed</h2>
 
-<!-- ================= CLASSES ================= -->
-<section class="section">
-  <h2>Choose Your Class</h2>
-  <div class="grid">
-    <div class="card">Class 6</div>
-    <div class="card">Class 7</div>
-    <div class="card">Class 8</div>
-    <div class="card">Class 9</div>
-    <div class="card">Class 10</div>
-  </div>
-</section>
+  <div class="card-grid">
+    <div class="card">
+      <small>Class 9 • Maths</small>
+      <h3>Linear Equations</h3>
+    </div>
 
-<!-- ================= WORKSHEETS ================= -->
-<section class="section grey">
-  <h2>Popular Worksheets</h2>
-  <div class="grid">
-    <div class="card">Class 8 Hindi – संज्ञा</div>
-    <div class="card">Class 9 Maths – Polynomials</div>
-    <div class="card">Class 10 Science – Acids</div>
-  </div>
-</section>
-
-<!-- ================= TOOLS ================= -->
-<section class="section">
-  <h2>Learning Tools</h2>
-  <div class="grid">
-    <div class="card">Amar Hindi Converter</div>
-    <div class="card">DOCX Converter</div>
+    <div class="card">
+      <small>Class 10 • Science</small>
+      <h3>Life Processes</h3>
+    </div>
   </div>
 </section>
 
 <!-- ================= FOOTER ================= -->
-<footer class="footer">
-  <div class="container footer-grid">
-    <div>© 2025 PadhnaLikhna</div>
-    <div>Privacy · Terms · Contact</div>
-  </div>
+<footer class="site-footer">
+  <p>© 2026 PadhnaLikhna • NCERT Learning Platform</p>
 </footer>
 
-<!-- ================= AUTH SCRIPT ================= -->
-<script>
-/* 🔥 FIREBASE INIT — MUST MATCH LOGIN & CONVERTER */
-firebase.initializeApp({
-  apiKey: "AIzaSyA50_nDcVr1PllKi9aff6Awo4w7XQAs3qc",
-  authDomain: "amarfont-converter.firebaseapp.com",
-  projectId: "amarfont-converter"
-});
-
-const auth = firebase.auth();
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-/* 🔐 HEADER AUTH STATE */
-auth.onAuthStateChanged(user => {
-
-  const loginLink = document.getElementById("loginLink");
-  const userBox = document.getElementById("userBox");
-  const userEmail = document.getElementById("userEmail");
-
-  if (!loginLink || !userBox || !userEmail) return;
-
-  if (user && user.emailVerified) {
-    loginLink.style.display = "none";
-    userBox.style.display = "flex";
-    userEmail.innerText = user.email;
-  } else {
-    loginLink.style.display = "inline-block";
-    userBox.style.display = "none";
-    userEmail.innerText = "";
-  }
-});
-
-/* 🚪 LOGOUT */
-function logoutUser(){
-  if(!confirm("Are you sure you want to logout?")) return;
-
-  auth.signOut().then(()=>{
-    window.location.href = "login.html";
-  });
-}
-</script>
+<!-- MAIN JS -->
+<script src="js/main.js"></script>
 
 </body>
 </html>
